@@ -76,9 +76,13 @@ class CosmosClient:
                 return self._request("PUT", f"/plugins/{existing}", files=files).json()
             return self._request("POST", "/plugins", files=files).json()
 
-    def install(self, plugin_hash: dict, timeout: float = INSTALL_TIMEOUT_SECONDS) -> str:
-        """Phase 2: confirm the plugin hash and wait until the install process finishes"""
-        name = plugin_hash["name"]
+    def install(self, plugin_hash: dict, gem_name: str | None = None, timeout: float = INSTALL_TIMEOUT_SECONDS) -> str:
+        """Phase 2: confirm the plugin hash and wait until the install process finishes
+
+        `gem_name` is the uploaded gem (from phase 1); `plugin_hash["name"]` names the plugin instance, which for an
+        upgrade is the already installed plugin so COSMOS replaces it instead of creating a second copy.
+        """
+        name = gem_name or plugin_hash["name"]
         response = self._request("POST", f"/plugins/install/{name}", data={"plugin_hash": json.dumps(plugin_hash)})
         process = response.text.strip().strip('"')
         deadline = time.monotonic() + timeout
@@ -88,13 +92,16 @@ class CosmosClient:
             if state in TERMINAL_STATES:
                 if state not in ("Complete", "Warning"):
                     raise CosmosApiError(f"Plugin install {name} ended in state {state}:\n{status.get('output', '')}")
-                return name
+                return plugin_hash["name"]
             time.sleep(POLL_SECONDS)
         raise CosmosApiError(f"Plugin install {name} did not finish within {timeout} seconds")
 
     def install_gem(self, gem_path: str, variables: dict[str, str] | None = None, existing: str | None = None) -> str:
         """Upload and install a gem, overriding plugin variables, returning the installed plugin name"""
         plugin_hash = self.upload(gem_path, existing)
+        gem_name = plugin_hash["name"]
+        if existing:
+            plugin_hash["name"] = existing
         if variables:
             unknown = set(variables) - set(plugin_hash.get("variables", {}))
             if unknown:
@@ -105,4 +112,4 @@ class CosmosClient:
                     current["value"] = value
                 else:
                     plugin_hash["variables"][name] = value
-        return self.install(plugin_hash)
+        return self.install(plugin_hash, gem_name)

@@ -113,8 +113,11 @@ def test_install_gem_upgrade_uses_put(client, tmp_path):
         FakeResponse(text='"proc__2"'),
         FakeResponse(body={"state": "Complete"}),
     ]
-    client.install_gem(str(gem), existing="old.gem__0")
-    assert client.session.calls[0][0:2] == ("PUT", "/plugins/old.gem__0")
+    assert client.install_gem(str(gem), existing="old.gem__0") == "old.gem__0"
+    upload, install, _ = client.session.calls
+    assert upload[0:2] == ("PUT", "/plugins/old.gem__0")
+    assert install[0:2] == ("POST", "/plugins/install/plugin.gem")
+    assert json.loads(install[2]["data"]["plugin_hash"])["name"] == "old.gem__0"
 
 
 def test_install_unknown_variable(client, tmp_path):
