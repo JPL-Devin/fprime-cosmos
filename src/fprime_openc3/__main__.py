@@ -8,6 +8,7 @@ not recognized here are forwarded to fprime-comm-bridge (for example --communica
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import ipaddress
 import os
 import shutil
@@ -23,6 +24,7 @@ from fprime_openc3.items import UnsupportedTypeError
 from fprime_openc3.plugin_builder import PluginArtifacts, build_plugin
 
 BRIDGE_EXECUTABLE = "fprime-comm-bridge"
+BRIDGE_MODULE = "fprime_gds.executables.comm_bridge"
 DOCKER_INTERFACE_PREFIXES = ("docker", "br-")
 # COSMOS receives plain F Prime packets, so the bridge strips Space Packet and Space Data Link framing
 DEFAULT_FRAMING = "space-packet-space-data-link"
@@ -94,7 +96,7 @@ def ensure_installed(client: CosmosClient, artifacts: PluginArtifacts, variables
 
 
 def docker_gateway_addresses() -> list[str]:
-    """IPv4 addresses of local Docker bridge interfaces, i.e. the sources COSMOS containers send from"""
+    """IPv4 addresses of local Docker bridge interfaces"""
     try:
         output = subprocess.run(["ip", "-4", "-o", "addr"], check=True, capture_output=True, text=True).stdout
     except (OSError, subprocess.CalledProcessError):
@@ -105,6 +107,25 @@ def docker_gateway_addresses() -> list[str]:
         if len(fields) >= 4 and fields[1].startswith(DOCKER_INTERFACE_PREFIXES):
             addresses.append(str(ipaddress.ip_interface(fields[3]).ip))
     return addresses
+
+
+def docker_container_addresses() -> list[str]:
+    """IPv4 addresses of the running Docker containers, i.e. the sources COSMOS sends commands from"""
+    template = "{{range .NetworkSettings.Networks}}{{println .IPAddress}}{{end}}"
+    try:
+        containers = subprocess.run(["docker", "ps", "-q"], check=True, capture_output=True, text=True).stdout.split()
+        if not containers:
+            return []
+        command = ["docker", "inspect", "--format", template, *containers]
+        output = subprocess.run(command, check=True, capture_output=True, text=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    return [line.strip() for line in output.splitlines() if line.strip()]
+
+
+def docker_source_addresses() -> list[str]:
+    """Addresses a local Docker COSMOS may send from: container addresses plus the bridge gateways"""
+    return list(dict.fromkeys([*docker_container_addresses(), *docker_gateway_addresses()]))
 
 
 def bridge_defaults(cosmos_url: str, extra: list[str]) -> list[str]:
@@ -123,18 +144,26 @@ def bridge_defaults(cosmos_url: str, extra: list[str]) -> list[str]:
         argument.startswith(("--udp-fast-bind-address", "--udp-fast-allowed-source")) for argument in extra
     ):
         return []
-    gateways = docker_gateway_addresses()
-    if not gateways:
+    sources = docker_source_addresses()
+    if not sources:
         return []
-    return ["--udp-fast-bind-address", "0.0.0.0", "--udp-fast-allowed-source", *gateways]  # noqa: S104
+    return ["--udp-fast-bind-address", "0.0.0.0", "--udp-fast-allowed-source", *sources]  # noqa: S104
+
+
+def bridge_command() -> list[str] | None:
+    """Prefer the bridge from this interpreter's environment so the launcher works without PATH activation."""
+    if importlib.util.find_spec(BRIDGE_MODULE) is not None:
+        return [sys.executable, "-m", BRIDGE_MODULE]
+    executable = shutil.which(BRIDGE_EXECUTABLE)
+    return None if executable is None else [executable]
 
 
 def run_bridge(dictionary: FprimeDictionary, framing: str, extra: list[str]) -> int:
-    executable = shutil.which(BRIDGE_EXECUTABLE)
-    if executable is None:
-        print(f"[ERROR] {BRIDGE_EXECUTABLE} not found on PATH; install fprime-gds", file=sys.stderr)
+    command = bridge_command()
+    if command is None:
+        print(f"[ERROR] {BRIDGE_EXECUTABLE} not found; install fprime-gds", file=sys.stderr)
         return 1
-    command = [executable, "--dictionary", str(dictionary.path), "--framing-selection", framing, *extra]
+    command += ["--dictionary", str(dictionary.path), "--framing-selection", framing, *extra]
     print(f"[INFO] Starting: {' '.join(command)}")
     try:
         return subprocess.call(command)

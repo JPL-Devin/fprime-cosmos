@@ -80,8 +80,11 @@ Plugin variables (all defaults match the bridge defaults):
 | `fprime_bridge_port` | `50001` | Bridge `--udp-fast-recv-port` (commands) |
 | `fprime_cosmos_port` | `50000` | Bridge `--udp-fast-send-port` (telemetry) |
 
-Commands arrive at the bridge from the Docker network, so allow that source address when it is not the
-default, for example `--udp-fast-allowed-source 172.18.0.1`.
+Commands reach the bridge from the COSMOS container addresses. When COSMOS is local, `fprime-openc3` reads
+those addresses from `docker ps`/`docker inspect` (plus the Docker bridge gateways) and starts the bridge with
+`--udp-fast-bind-address 0.0.0.0 --udp-fast-allowed-source <addresses>`; restart it if the containers are
+recreated with new addresses. Passing either option yourself disables this defaulting, for example
+`--udp-fast-allowed-source 172.18.0.6` for a remote COSMOS.
 
 ### Generating without installing
 
