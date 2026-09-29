@@ -33,6 +33,7 @@ def test_launcher_skip_everything(tmp_path, capsys):
 def test_launcher_forwards_bridge_arguments(tmp_path, monkeypatch):
     calls = []
     monkeypatch.setattr(launcher.shutil, "which", lambda name: f"/bin/{name}")
+    monkeypatch.setattr(launcher, "docker_gateway_addresses", lambda: [])
     monkeypatch.setattr(launcher.subprocess, "call", lambda command: calls.append(command) or 0)
     argv = [
         "--dictionary",
@@ -49,3 +50,31 @@ def test_launcher_forwards_bridge_arguments(tmp_path, monkeypatch):
     assert command[1:3] == ["--dictionary", str(REFERENCE_DICTIONARY.resolve())]
     assert command[3:5] == ["--framing-selection", launcher.DEFAULT_FRAMING]
     assert command[5:] == ["--communication-selection", "udp"]
+
+
+def test_bridge_defaults_for_local_docker_cosmos(monkeypatch):
+    monkeypatch.setattr(launcher, "docker_gateway_addresses", lambda: ["172.17.0.1", "172.18.0.1"])
+    assert launcher.bridge_defaults("http://localhost:2900", []) == [
+        "--udp-fast-bind-address",
+        "0.0.0.0",
+        "--udp-fast-allowed-source",
+        "172.17.0.1",
+        "172.18.0.1",
+    ]
+    assert launcher.bridge_defaults("http://localhost:2900", ["--udp-fast-allowed-source", "10.0.0.1"]) == []
+    assert launcher.bridge_defaults("http://cosmos.example.invalid:2900", []) == []
+
+
+def test_bridge_defaults_without_docker(monkeypatch):
+    monkeypatch.setattr(launcher, "docker_gateway_addresses", lambda: [])
+    assert launcher.bridge_defaults("http://127.0.0.1:2900", []) == []
+
+
+def test_docker_gateway_addresses(monkeypatch):
+    output = (
+        "1: lo    inet 127.0.0.1/8 scope host lo\n"
+        "3: docker0    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0\n"
+        "4: br-5    inet 172.18.0.1/16 brd 172.18.255.255 scope global br-5\n"
+    )
+    monkeypatch.setattr(launcher.subprocess, "run", lambda *a, **k: type("R", (), {"stdout": output})())
+    assert launcher.docker_gateway_addresses() == ["172.17.0.1", "172.18.0.1"]

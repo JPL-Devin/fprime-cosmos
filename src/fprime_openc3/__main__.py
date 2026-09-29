@@ -8,8 +8,10 @@ not recognized here are forwarded to fprime-comm-bridge (for example --communica
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import os
 import shutil
+import socket
 import subprocess
 import sys
 from pathlib import Path
@@ -21,6 +23,7 @@ from fprime_openc3.items import UnsupportedTypeError
 from fprime_openc3.plugin_builder import PluginArtifacts, build_plugin
 
 BRIDGE_EXECUTABLE = "fprime-comm-bridge"
+DOCKER_INTERFACE_PREFIXES = ("docker", "br-")
 # COSMOS receives plain F Prime packets, so the bridge strips Space Packet and Space Data Link framing
 DEFAULT_FRAMING = "space-packet-space-data-link"
 PASSWORD_ENVIRONMENT = "OPENC3_API_PASSWORD"  # noqa: S105 - name of the variable, not a secret
@@ -90,6 +93,42 @@ def ensure_installed(client: CosmosClient, artifacts: PluginArtifacts, variables
     print(f"[INFO] Installed {name}")
 
 
+def docker_gateway_addresses() -> list[str]:
+    """IPv4 addresses of local Docker bridge interfaces, i.e. the sources COSMOS containers send from"""
+    try:
+        output = subprocess.run(["ip", "-4", "-o", "addr"], check=True, capture_output=True, text=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    addresses = []
+    for line in output.splitlines():
+        fields = line.split()
+        if len(fields) >= 4 and fields[1].startswith(DOCKER_INTERFACE_PREFIXES):
+            addresses.append(str(ipaddress.ip_interface(fields[3]).ip))
+    return addresses
+
+
+def bridge_defaults(cosmos_url: str, extra: list[str]) -> list[str]:
+    """Bridge arguments letting a COSMOS running in local Docker containers reach the bridge
+
+    Only applied when COSMOS is local and the user has not configured the UDP side themselves.
+    """
+    host = cosmos_url.split("://", 1)[-1].split("/", 1)[0].rsplit(":", 1)[0]
+    try:
+        local = host in ("localhost", "127.0.0.1") or socket.gethostbyname(host) == socket.gethostbyname(
+            socket.gethostname()
+        )
+    except OSError:
+        local = False
+    if not local or any(
+        argument.startswith(("--udp-fast-bind-address", "--udp-fast-allowed-source")) for argument in extra
+    ):
+        return []
+    gateways = docker_gateway_addresses()
+    if not gateways:
+        return []
+    return ["--udp-fast-bind-address", "0.0.0.0", "--udp-fast-allowed-source", *gateways]  # noqa: S104
+
+
 def run_bridge(dictionary: FprimeDictionary, framing: str, extra: list[str]) -> int:
     executable = shutil.which(BRIDGE_EXECUTABLE)
     if executable is None:
@@ -119,6 +158,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     if args.skip_bridge:
         return 0
+    bridge_arguments = [*bridge_defaults(args.cosmos_url, bridge_arguments), *bridge_arguments]
     return run_bridge(dictionary, args.framing_selection, bridge_arguments)
 
 
