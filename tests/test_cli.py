@@ -54,9 +54,10 @@ def test_launcher_forwards_bridge_arguments(tmp_path, monkeypatch):
 
 def test_bridge_defaults_for_local_docker_cosmos(monkeypatch):
     monkeypatch.setattr(launcher, "docker_source_addresses", lambda: ["172.18.0.6", "172.17.0.1"])
+    monkeypatch.setattr(launcher, "docker_host_address", lambda: "172.17.0.1")
     assert launcher.bridge_defaults("http://localhost:2900", []) == [
         "--udp-fast-bind-address",
-        "0.0.0.0",
+        "172.17.0.1",
         "--udp-fast-allowed-source",
         "172.18.0.6",
         "172.17.0.1",
@@ -70,6 +71,12 @@ def test_bridge_defaults_without_docker(monkeypatch):
     assert launcher.bridge_defaults("http://127.0.0.1:2900", []) == []
 
 
+def test_bridge_defaults_bind_any_without_docker0(monkeypatch):
+    monkeypatch.setattr(launcher, "docker_source_addresses", lambda: ["172.18.0.6"])
+    monkeypatch.setattr(launcher, "docker_host_address", lambda: None)
+    assert launcher.bridge_defaults("http://localhost:2900", [])[:2] == ["--udp-fast-bind-address", "0.0.0.0"]
+
+
 def test_docker_gateway_addresses(monkeypatch):
     output = (
         "1: lo    inet 127.0.0.1/8 scope host lo\n"
@@ -78,6 +85,65 @@ def test_docker_gateway_addresses(monkeypatch):
     )
     monkeypatch.setattr(launcher.subprocess, "run", lambda *a, **k: type("R", (), {"stdout": output})())
     assert launcher.docker_gateway_addresses() == ["172.17.0.1", "172.18.0.1"]
+    assert launcher.docker_host_address() == "172.17.0.1"
+
+
+class FakeClient:
+    """Stands in for CosmosClient: a fixed set of installed plugins and a record of install calls"""
+
+    scope = "DEFAULT"
+
+    def __init__(self, installed):
+        self.installed = installed
+        self.installs = []
+
+    def authenticate(self):
+        pass
+
+    def plugins(self):
+        return list(self.installed)
+
+    def plugin(self, name):
+        return {"variables": {"fprime_target_name": {"value": self.installed[name]}}}
+
+    def install_gem(self, gem_path, variables, existing):
+        self.installs.append((gem_path, variables, existing))
+        return "new"
+
+
+def artifacts(tmp_path, digest="abc"):
+    gem = tmp_path / f"openc3-cosmos-fprime-ref-1.0.0.{digest}.gem"
+    gem.touch()
+    return launcher.PluginArtifacts(tmp_path, "openc3-cosmos-fprime-ref", f"1.0.0.{digest}", gem)
+
+
+def test_installed_plugin_for_target_ignores_other_targets_and_plugins():
+    client = FakeClient(
+        {
+            "openc3-cosmos-tool-admin-7.4.1.gem__0": None,
+            "openc3-cosmos-fprime-ref-two-1.0.0.111.gem__0": "OTHER",
+            "openc3-cosmos-fprime-yamcs-1.0.0.222.gem__0": "FPRIME",
+        }
+    )
+    assert launcher.installed_plugin_for_target(client, "FPRIME") == "openc3-cosmos-fprime-yamcs-1.0.0.222.gem__0"
+    assert launcher.installed_plugin_for_target(client, "NONE") is None
+
+
+def test_ensure_installed_skips_same_digest_and_upgrades_target_owner(tmp_path):
+    same = "openc3-cosmos-fprime-ref-1.0.0.abc.gem__3"
+    client = FakeClient({same: "FPRIME"})
+    launcher.ensure_installed(client, artifacts(tmp_path), {}, "FPRIME", force=False)
+    assert client.installs == []
+    launcher.ensure_installed(client, artifacts(tmp_path), {}, "FPRIME", force=True)
+    assert client.installs[-1][2] == same
+
+    other = "openc3-cosmos-fprime-other-1.0.0.999.gem__0"
+    client = FakeClient({other: "FPRIME", "openc3-cosmos-fprime-ref-1.0.0.abc.gem__0": "REF2"})
+    launcher.ensure_installed(client, artifacts(tmp_path), {}, "FPRIME", force=False)
+    assert client.installs[-1][2] == other
+    client = FakeClient({})
+    launcher.ensure_installed(client, artifacts(tmp_path), {"fprime_bridge_port": "1"}, "FPRIME", force=False)
+    assert client.installs[-1][1:] == ({"fprime_bridge_port": "1"}, None)
 
 
 def test_bridge_command_prefers_current_interpreter(monkeypatch):

@@ -21,11 +21,14 @@ from fprime_openc3.cosmos_api import CosmosApiError, CosmosClient
 from fprime_openc3.dictionary import DictionaryError, FprimeDictionary
 from fprime_openc3.generate.__main__ import add_dictionary_arguments
 from fprime_openc3.items import UnsupportedTypeError
-from fprime_openc3.plugin_builder import PluginArtifacts, build_plugin
+from fprime_openc3.plugin_builder import GEM_NAME_PREFIX, PluginArtifacts, build_plugin
 
 BRIDGE_EXECUTABLE = "fprime-comm-bridge"
 BRIDGE_MODULE = "fprime_gds.executables.comm_bridge"
 DOCKER_INTERFACE_PREFIXES = ("docker", "br-")
+DOCKER_HOST_INTERFACE = "docker"  # host.docker.internal resolves to the default bridge (docker0) gateway
+BIND_ANY = "0.0.0.0"  # noqa: S104 - last resort when the Docker host address cannot be determined
+TARGET_VARIABLE = "fprime_target_name"
 # COSMOS receives plain F Prime packets, so the bridge strips Space Packet and Space Data Link framing
 DEFAULT_FRAMING = "space-packet-space-data-link"
 PASSWORD_ENVIRONMENT = "OPENC3_API_PASSWORD"  # noqa: S105 - name of the variable, not a secret
@@ -80,33 +83,57 @@ def parse_variables(pairs: list[str]) -> dict[str, str]:
     return variables
 
 
-def ensure_installed(client: CosmosClient, artifacts: PluginArtifacts, variables: dict[str, str], force: bool) -> None:
-    """Install the gem unless a plugin built from the same dictionary digest is already present"""
+def installed_plugin_for_target(client: CosmosClient, target: str) -> str | None:
+    """The fprime plugin currently serving `target`, whichever dictionary it was generated from"""
+    for name in client.plugins():
+        if not name.startswith(f"{GEM_NAME_PREFIX}-"):
+            continue
+        variable = client.plugin(name).get("variables", {}).get(TARGET_VARIABLE)
+        value = variable.get("value") if isinstance(variable, dict) else variable
+        if value == target:
+            return name
+    return None
+
+
+def ensure_installed(
+    client: CosmosClient, artifacts: PluginArtifacts, variables: dict[str, str], target: str, force: bool
+) -> None:
+    """Install the gem unless a plugin built from the same dictionary digest already serves the target"""
     client.authenticate()
-    if not force and client.find_plugin(artifacts.plugin_prefix):
-        print(
-            f"[INFO] COSMOS already has {artifacts.plugin_prefix}; skipping install (use --force-install to override)"
-        )
+    existing = installed_plugin_for_target(client, target)
+    if existing and existing.startswith(f"{artifacts.plugin_prefix}.gem__") and not force:
+        print(f"[INFO] COSMOS target {target} already runs {existing}; skipping install (--force-install overrides)")
         return
-    existing = client.find_plugin(f"{artifacts.gem_name}-")
     action = f"Upgrading {existing}" if existing else "Installing"
     print(f"[INFO] {action} {artifacts.gem_path.name} into COSMOS scope {client.scope}")
     name = client.install_gem(str(artifacts.gem_path), variables, existing)
     print(f"[INFO] Installed {name}")
 
 
-def docker_gateway_addresses() -> list[str]:
-    """IPv4 addresses of local Docker bridge interfaces"""
+def docker_interfaces() -> list[tuple[str, str]]:
+    """(interface, IPv4 address) of the local Docker bridge interfaces"""
     try:
         output = subprocess.run(["ip", "-4", "-o", "addr"], check=True, capture_output=True, text=True).stdout
     except (OSError, subprocess.CalledProcessError):
         return []
-    addresses = []
+    interfaces = []
     for line in output.splitlines():
         fields = line.split()
         if len(fields) >= 4 and fields[1].startswith(DOCKER_INTERFACE_PREFIXES):
-            addresses.append(str(ipaddress.ip_interface(fields[3]).ip))
-    return addresses
+            interfaces.append((fields[1], str(ipaddress.ip_interface(fields[3]).ip)))
+    return interfaces
+
+
+def docker_gateway_addresses() -> list[str]:
+    """IPv4 addresses of local Docker bridge interfaces"""
+    return [address for _interface, address in docker_interfaces()]
+
+
+def docker_host_address() -> str | None:
+    """The address containers reach the host at (host.docker.internal), so the bridge need not bind every interface"""
+    return next(
+        (address for interface, address in docker_interfaces() if interface.startswith(DOCKER_HOST_INTERFACE)), None
+    )
 
 
 def docker_container_addresses() -> list[str]:
@@ -147,7 +174,8 @@ def bridge_defaults(cosmos_url: str, extra: list[str]) -> list[str]:
     sources = docker_source_addresses()
     if not sources:
         return []
-    return ["--udp-fast-bind-address", "0.0.0.0", "--udp-fast-allowed-source", *sources]  # noqa: S104
+    bind = docker_host_address() or BIND_ANY
+    return ["--udp-fast-bind-address", bind, "--udp-fast-allowed-source", *sources]
 
 
 def bridge_command() -> list[str] | None:
@@ -181,7 +209,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[INFO] Generated {artifacts.gem_path}")
         if not args.skip_install:
             client = CosmosClient(args.cosmos_url, args.cosmos_password, args.cosmos_scope)
-            ensure_installed(client, artifacts, variables, args.force_install)
+            target = variables.get(TARGET_VARIABLE, args.target_name)
+            ensure_installed(client, artifacts, variables, target, args.force_install)
     except (DictionaryError, UnsupportedTypeError, CosmosApiError, ValueError) as error:
         print(f"[ERROR] {error}", file=sys.stderr)
         return 1

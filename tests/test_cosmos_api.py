@@ -82,6 +82,12 @@ def test_find_plugin(client):
     assert client.find_plugin("openc3-cosmos-fprime-ref-1.0.0.abc") == "openc3-cosmos-fprime-ref-1.0.0.abc.gem__0"
 
 
+def test_plugin_reads_installed_hash(client):
+    client.session.responses = [FakeResponse(body={"name": "p__0", "variables": {"fprime_target_name": "X"}})]
+    assert client.plugin("p__0")["variables"] == {"fprime_target_name": "X"}
+    assert client.session.calls[0][:2] == ("GET", "/plugins/p__0")
+
+
 def test_install_gem_two_phases(client, tmp_path):
     gem = tmp_path / "plugin.gem"
     gem.write_bytes(b"gem")

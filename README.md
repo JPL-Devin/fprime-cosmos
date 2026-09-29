@@ -18,7 +18,15 @@ F Prime deployment  <-- framing / transport -->  fprime-comm-bridge  <-- UDP, F 
 pip install fprime-openc3
 ```
 
-This pulls in `fprime-gds`, which provides the dictionary loaders and `fprime-comm-bridge`.
+This pulls in `fprime-gds`, which provides the dictionary loaders and `fprime-comm-bridge`. Until an
+`fprime-gds` release ships `fprime-comm-bridge` (4.3.1 does not), install it from the development branch first:
+
+```bash
+pip install "git+https://github.com/nasa/fprime-gds.git@devel"
+```
+
+Prefer `$OPENC3_API_PASSWORD` over `--cosmos-password`; command-line arguments are visible to other users of the
+machine. The default `--cosmos-url` is plain HTTP on `localhost`; use an `https://` URL for a remote COSMOS.
 
 ## Quick start
 
@@ -82,9 +90,16 @@ Plugin variables (all defaults match the bridge defaults):
 
 Commands reach the bridge from the COSMOS container addresses. When COSMOS is local, `fprime-openc3` reads
 those addresses from `docker ps`/`docker inspect` (plus the Docker bridge gateways) and starts the bridge with
-`--udp-fast-bind-address 0.0.0.0 --udp-fast-allowed-source <addresses>`; restart it if the containers are
-recreated with new addresses. Passing either option yourself disables this defaulting, for example
-`--udp-fast-allowed-source 172.18.0.6` for a remote COSMOS.
+`--udp-fast-bind-address <docker0 address> --udp-fast-allowed-source <addresses>`, i.e. the bridge listens only
+on the address the containers know as `host.docker.internal` and only accepts datagrams from them (the bridge
+command port is otherwise unauthenticated). Restart the launcher if the containers are recreated with new
+addresses. Passing either option yourself disables this defaulting, for example
+`--udp-fast-bind-address 192.168.1.5 --udp-fast-allowed-source 192.168.1.20` for a remote COSMOS (and set
+`--cosmos-variable fprime_bridge_host=192.168.1.5` so COSMOS sends commands to that address).
+
+One plugin serves one COSMOS target: installing a dictionary for a target that another F Prime plugin already
+serves upgrades that plugin in place (COSMOS forbids two plugins defining the same target). Use
+`--target-name` to run several deployments side by side.
 
 ### Generating without installing
 
@@ -105,7 +120,9 @@ channel and packet identifier types, `FwSizeStoreType` string lengths, boolean e
   `name.member`, arrays of numbers become COSMOS arrays and other arrays are flattened to `name[i]`.
 - **Channelized telemetry** – the `FPRIME_CHANNELS` parent packet carries the concatenated channel records and a
   `SUBPACKETIZER` (`fprime_subpacketizer.py`) splits it into one `SUBPACKET` per channel with the channel id,
-  F Prime time (`PACKET_TIME` derived from it), the value, `FORMAT_STRING` and `LIMITS` from the dictionary.
+  F Prime time (and `FPRIME_TIME`, that time as Unix time), the value, `FORMAT_STRING` and `LIMITS` from the
+  dictionary. COSMOS stamps packets with the received time; rename `FPRIME_TIME` to `PACKET_TIME` in a copy of
+  the plugin to stamp them with F Prime time instead (only meaningful for `TB_WORKSTATION_TIME`).
 - **Packetized telemetry** – one packet per entry of the selected `telemetryPacketSets` set.
 - `FPRIME_UNKNOWN` catches packets the plugin does not model (events, files, data products).
 

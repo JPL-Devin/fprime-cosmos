@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from fprime_openc3 import emit
+from fprime_openc3.items import CosmosItem
 
 GOLDEN = Path(__file__).parent / "golden"
 EMITTERS = {"commands.txt": emit.emit_commands, "channels.txt": emit.emit_channels, "packets.txt": emit.emit_packets}
@@ -80,3 +81,37 @@ def test_printf_format(python, printf):
 def test_quote_flattens_whitespace_and_quotes():
     assert emit.quote(' say "hi"\n there ') == "\"say 'hi' there\""
     assert emit.quote(None) == '""'
+
+
+class StubChannel:
+    """Just the ChTemplate accessors `_channel_modifiers` reads"""
+
+    def __init__(self, fmt=None, low_red=None, low_yellow=None, high_yellow=None, high_red=None):
+        self.values = (fmt, low_red, low_yellow, high_yellow, high_red)
+
+    def get_format_str(self):
+        return self.values[0]
+
+    def get_low_red(self):
+        return self.values[1]
+
+    def get_low_yellow(self):
+        return self.values[2]
+
+    def get_high_yellow(self):
+        return self.values[3]
+
+    def get_high_red(self):
+        return self.values[4]
+
+
+def test_channel_modifiers_limits_default_to_type_range_and_neighbouring_bound():
+    item = CosmosItem("V", 8, "UINT")
+    assert emit._channel_modifiers(StubChannel(high_red=200), item) == ["LIMITS DEFAULT 1 ENABLED 0 0 200 200"]
+    assert emit._channel_modifiers(StubChannel("{:.2f}", -1.5, -1.0, 1.0, 1.5), CosmosItem("V", 32, "FLOAT")) == [
+        'FORMAT_STRING "%.2f"',
+        "LIMITS DEFAULT 1 ENABLED -1.5 -1.0 1.0 1.5",
+    ]
+    assert emit._channel_modifiers(StubChannel("{}"), item) == []
+    enum_item = CosmosItem("V", 8, "UINT", states=(("A", 0),))
+    assert emit._channel_modifiers(StubChannel("{:d}"), enum_item) == []

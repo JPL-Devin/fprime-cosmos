@@ -20,7 +20,7 @@ TELEMETRY <%= target_name %> CdhCore.cmdDisp.CommandsDispatched BIG_ENDIAN "Numb
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CommandsDispatched 32 UINT "Number of commands dispatched"
     META FPRIME_TYPE "U32Type"
@@ -38,7 +38,7 @@ TELEMETRY <%= target_name %> CdhCore.cmdDisp.CommandErrors BIG_ENDIAN "Number of
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CommandErrors 32 UINT "Number of command errors"
     META FPRIME_TYPE "U32Type"
@@ -56,7 +56,7 @@ TELEMETRY <%= target_name %> CdhCore.cmdDisp.CommandsDropped BIG_ENDIAN "Number 
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CommandsDropped 32 UINT "Number of commands drooped due to buffer overflow"
     META FPRIME_TYPE "U32Type"
@@ -74,7 +74,7 @@ TELEMETRY <%= target_name %> CdhCore.health.PingLateWarnings BIG_ENDIAN "Number 
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM PingLateWarnings 32 UINT "Number of overrun warnings"
     META FPRIME_TYPE "U32Type"
@@ -92,7 +92,7 @@ TELEMETRY <%= target_name %> CdhCore.version.FrameworkVersion BIG_ENDIAN "Softwa
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM FrameworkVersion_LENGTH 16 UINT "Length in bytes of FrameworkVersion (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -113,7 +113,7 @@ TELEMETRY <%= target_name %> CdhCore.version.ProjectVersion BIG_ENDIAN "Software
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM ProjectVersion_LENGTH 16 UINT "Length in bytes of ProjectVersion (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -134,7 +134,7 @@ TELEMETRY <%= target_name %> CdhCore.version.CustomVersion01 BIG_ENDIAN "Custom 
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CustomVersion01.version_enum 32 UINT "enumeration/name of the custom version"
     STATE PROJECT_VERSION_00 0
@@ -171,7 +171,7 @@ TELEMETRY <%= target_name %> CdhCore.version.CustomVersion02 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CustomVersion02.version_enum 32 UINT "enumeration/name of the custom version"
     STATE PROJECT_VERSION_00 0
@@ -208,7 +208,7 @@ TELEMETRY <%= target_name %> CdhCore.version.CustomVersion03 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CustomVersion03.version_enum 32 UINT "enumeration/name of the custom version"
     STATE PROJECT_VERSION_00 0
@@ -245,7 +245,7 @@ TELEMETRY <%= target_name %> CdhCore.version.CustomVersion04 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CustomVersion04.version_enum 32 UINT "enumeration/name of the custom version"
     STATE PROJECT_VERSION_00 0
@@ -282,7 +282,7 @@ TELEMETRY <%= target_name %> CdhCore.version.CustomVersion05 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CustomVersion05.version_enum 32 UINT "enumeration/name of the custom version"
     STATE PROJECT_VERSION_00 0
@@ -319,7 +319,7 @@ TELEMETRY <%= target_name %> CdhCore.version.CustomVersion06 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CustomVersion06.version_enum 32 UINT "enumeration/name of the custom version"
     STATE PROJECT_VERSION_00 0
@@ -356,7 +356,7 @@ TELEMETRY <%= target_name %> CdhCore.version.CustomVersion07 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CustomVersion07.version_enum 32 UINT "enumeration/name of the custom version"
     STATE PROJECT_VERSION_00 0
@@ -393,7 +393,7 @@ TELEMETRY <%= target_name %> CdhCore.version.CustomVersion08 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CustomVersion08.version_enum 32 UINT "enumeration/name of the custom version"
     STATE PROJECT_VERSION_00 0
@@ -430,7 +430,7 @@ TELEMETRY <%= target_name %> CdhCore.version.CustomVersion09 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CustomVersion09.version_enum 32 UINT "enumeration/name of the custom version"
     STATE PROJECT_VERSION_00 0
@@ -467,7 +467,7 @@ TELEMETRY <%= target_name %> CdhCore.version.CustomVersion10 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CustomVersion10.version_enum 32 UINT "enumeration/name of the custom version"
     STATE PROJECT_VERSION_00 0
@@ -504,7 +504,7 @@ TELEMETRY <%= target_name %> CdhCore.version.LibraryVersion01 BIG_ENDIAN "Librar
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM LibraryVersion01_LENGTH 16 UINT "Length in bytes of LibraryVersion01 (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -525,7 +525,7 @@ TELEMETRY <%= target_name %> CdhCore.version.LibraryVersion02 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM LibraryVersion02_LENGTH 16 UINT "Length in bytes of LibraryVersion02 (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -546,7 +546,7 @@ TELEMETRY <%= target_name %> CdhCore.version.LibraryVersion03 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM LibraryVersion03_LENGTH 16 UINT "Length in bytes of LibraryVersion03 (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -567,7 +567,7 @@ TELEMETRY <%= target_name %> CdhCore.version.LibraryVersion04 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM LibraryVersion04_LENGTH 16 UINT "Length in bytes of LibraryVersion04 (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -588,7 +588,7 @@ TELEMETRY <%= target_name %> CdhCore.version.LibraryVersion05 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM LibraryVersion05_LENGTH 16 UINT "Length in bytes of LibraryVersion05 (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -609,7 +609,7 @@ TELEMETRY <%= target_name %> CdhCore.version.LibraryVersion06 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM LibraryVersion06_LENGTH 16 UINT "Length in bytes of LibraryVersion06 (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -630,7 +630,7 @@ TELEMETRY <%= target_name %> CdhCore.version.LibraryVersion07 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM LibraryVersion07_LENGTH 16 UINT "Length in bytes of LibraryVersion07 (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -651,7 +651,7 @@ TELEMETRY <%= target_name %> CdhCore.version.LibraryVersion08 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM LibraryVersion08_LENGTH 16 UINT "Length in bytes of LibraryVersion08 (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -672,7 +672,7 @@ TELEMETRY <%= target_name %> CdhCore.version.LibraryVersion09 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM LibraryVersion09_LENGTH 16 UINT "Length in bytes of LibraryVersion09 (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -693,7 +693,7 @@ TELEMETRY <%= target_name %> CdhCore.version.LibraryVersion10 BIG_ENDIAN ""
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM LibraryVersion10_LENGTH 16 UINT "Length in bytes of LibraryVersion10 (maximum 40)"
     META FPRIME_TYPE "FwSizeStoreType"
@@ -714,7 +714,7 @@ TELEMETRY <%= target_name %> CdhCore.tlmSend.SendLevel BIG_ENDIAN "Telemetry sen
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM SendLevel 32 UINT "Telemetry send level"
     META FPRIME_TYPE "U32Type"
@@ -732,7 +732,7 @@ TELEMETRY <%= target_name %> ComCcsds.comQueue.comQueueDepth BIG_ENDIAN "Depth o
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ARRAY_ITEM comQueueDepth 32 UINT 64 "Depth of queues of Fw::ComBuffer type"
     META FPRIME_TYPE "Svc.ComQueueDepth"
@@ -750,7 +750,7 @@ TELEMETRY <%= target_name %> ComCcsds.comQueue.buffQueueDepth BIG_ENDIAN "Depth 
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ARRAY_ITEM buffQueueDepth 32 UINT 32 "Depth of queues of Fw::Buffer type"
     META FPRIME_TYPE "Svc.BuffQueueDepth"
@@ -768,7 +768,7 @@ TELEMETRY <%= target_name %> ComCcsds.commsBufferManager.TotalBuffs BIG_ENDIAN "
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM TotalBuffs 32 UINT "The total buffers allocated"
     META FPRIME_TYPE "U32Type"
@@ -786,7 +786,7 @@ TELEMETRY <%= target_name %> ComCcsds.commsBufferManager.CurrBuffs BIG_ENDIAN "T
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CurrBuffs 32 UINT "The current number of allocated buffers"
     META FPRIME_TYPE "U32Type"
@@ -804,7 +804,7 @@ TELEMETRY <%= target_name %> ComCcsds.commsBufferManager.HiBuffs BIG_ENDIAN "The
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM HiBuffs 32 UINT "The high water mark of allocated buffers"
     META FPRIME_TYPE "U32Type"
@@ -822,7 +822,7 @@ TELEMETRY <%= target_name %> ComCcsds.commsBufferManager.NoBuffs BIG_ENDIAN "The
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NoBuffs 32 UINT "The number of requests that couldn't return a buffer"
     LIMITS DEFAULT 1 ENABLED 0 0 1 1
@@ -841,7 +841,7 @@ TELEMETRY <%= target_name %> ComCcsds.commsBufferManager.EmptyBuffs BIG_ENDIAN "
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM EmptyBuffs 32 UINT "The number of empty buffers returned"
     LIMITS DEFAULT 1 ENABLED 0 0 1 1
@@ -860,7 +860,7 @@ TELEMETRY <%= target_name %> DataProducts.dpCat.CatalogDps BIG_ENDIAN "Number of
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CatalogDps 32 UINT "Number of data products in catalog"
     META FPRIME_TYPE "U32Type"
@@ -878,7 +878,7 @@ TELEMETRY <%= target_name %> DataProducts.dpCat.DpsSent BIG_ENDIAN "Number of da
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM DpsSent 32 UINT "Number of data products sent"
     META FPRIME_TYPE "U32Type"
@@ -896,7 +896,7 @@ TELEMETRY <%= target_name %> DataProducts.dpMgr.NumSuccessfulAllocations BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NumSuccessfulAllocations 32 UINT "The number of successful buffer allocations"
     META FPRIME_TYPE "U32Type"
@@ -914,7 +914,7 @@ TELEMETRY <%= target_name %> DataProducts.dpMgr.NumFailedAllocations BIG_ENDIAN 
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NumFailedAllocations 32 UINT "The number of failed buffer allocations"
     META FPRIME_TYPE "U32Type"
@@ -932,7 +932,7 @@ TELEMETRY <%= target_name %> DataProducts.dpMgr.NumDataProducts BIG_ENDIAN "Numb
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NumDataProducts 32 UINT "Number of data products handled"
     META FPRIME_TYPE "U32Type"
@@ -950,7 +950,7 @@ TELEMETRY <%= target_name %> DataProducts.dpMgr.NumBytes BIG_ENDIAN "Number of b
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NumBytes 64 UINT "Number of bytes handled"
     META FPRIME_TYPE "U64Type"
@@ -968,7 +968,7 @@ TELEMETRY <%= target_name %> DataProducts.dpWriter.NumBuffersReceived BIG_ENDIAN
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NumBuffersReceived 32 UINT "The number of buffers received"
     META FPRIME_TYPE "U32Type"
@@ -986,7 +986,7 @@ TELEMETRY <%= target_name %> DataProducts.dpWriter.NumBytesWritten BIG_ENDIAN "T
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NumBytesWritten 64 UINT "The number of bytes written"
     META FPRIME_TYPE "U64Type"
@@ -1004,7 +1004,7 @@ TELEMETRY <%= target_name %> DataProducts.dpWriter.NumSuccessfulWrites BIG_ENDIA
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NumSuccessfulWrites 32 UINT "The number of successful writes"
     META FPRIME_TYPE "U32Type"
@@ -1022,7 +1022,7 @@ TELEMETRY <%= target_name %> DataProducts.dpWriter.NumFailedWrites BIG_ENDIAN "T
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NumFailedWrites 32 UINT "The number of failed writes"
     META FPRIME_TYPE "U32Type"
@@ -1040,7 +1040,7 @@ TELEMETRY <%= target_name %> DataProducts.dpWriter.NumErrors BIG_ENDIAN "The num
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NumErrors 32 UINT "The number of errors"
     META FPRIME_TYPE "U32Type"
@@ -1058,7 +1058,7 @@ TELEMETRY <%= target_name %> DataProducts.dpBufferManager.TotalBuffs BIG_ENDIAN 
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM TotalBuffs 32 UINT "The total buffers allocated"
     META FPRIME_TYPE "U32Type"
@@ -1076,7 +1076,7 @@ TELEMETRY <%= target_name %> DataProducts.dpBufferManager.CurrBuffs BIG_ENDIAN "
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CurrBuffs 32 UINT "The current number of allocated buffers"
     META FPRIME_TYPE "U32Type"
@@ -1094,7 +1094,7 @@ TELEMETRY <%= target_name %> DataProducts.dpBufferManager.HiBuffs BIG_ENDIAN "Th
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM HiBuffs 32 UINT "The high water mark of allocated buffers"
     META FPRIME_TYPE "U32Type"
@@ -1112,7 +1112,7 @@ TELEMETRY <%= target_name %> DataProducts.dpBufferManager.NoBuffs BIG_ENDIAN "Th
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NoBuffs 32 UINT "The number of requests that couldn't return a buffer"
     LIMITS DEFAULT 1 ENABLED 0 0 1 1
@@ -1131,7 +1131,7 @@ TELEMETRY <%= target_name %> DataProducts.dpBufferManager.EmptyBuffs BIG_ENDIAN 
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM EmptyBuffs 32 UINT "The number of empty buffers returned"
     LIMITS DEFAULT 1 ENABLED 0 0 1 1
@@ -1150,7 +1150,7 @@ TELEMETRY <%= target_name %> FileHandling.fileUplink.FilesReceived BIG_ENDIAN "T
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM FilesReceived 32 UINT "The total number of complete files received"
     META FPRIME_TYPE "U32Type"
@@ -1168,7 +1168,7 @@ TELEMETRY <%= target_name %> FileHandling.fileUplink.PacketsReceived BIG_ENDIAN 
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM PacketsReceived 32 UINT "The total number of packets received"
     META FPRIME_TYPE "U32Type"
@@ -1186,7 +1186,7 @@ TELEMETRY <%= target_name %> FileHandling.fileUplink.Warnings BIG_ENDIAN "The to
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM Warnings 32 UINT "The total number of warnings issued"
     META FPRIME_TYPE "U32Type"
@@ -1204,7 +1204,7 @@ TELEMETRY <%= target_name %> FileHandling.fileDownlink.FilesSent BIG_ENDIAN "The
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM FilesSent 32 UINT "The total number of files sent"
     META FPRIME_TYPE "U32Type"
@@ -1222,7 +1222,7 @@ TELEMETRY <%= target_name %> FileHandling.fileDownlink.PacketsSent BIG_ENDIAN "T
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM PacketsSent 32 UINT "The total number of packets sent"
     META FPRIME_TYPE "U32Type"
@@ -1240,7 +1240,7 @@ TELEMETRY <%= target_name %> FileHandling.fileDownlink.Warnings BIG_ENDIAN "The 
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM Warnings 32 UINT "The total number of warnings"
     META FPRIME_TYPE "U32Type"
@@ -1258,7 +1258,7 @@ TELEMETRY <%= target_name %> FileHandling.fileManager.CommandsExecuted BIG_ENDIA
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CommandsExecuted 32 UINT "The total number of commands successfully executed"
     META FPRIME_TYPE "U32Type"
@@ -1276,7 +1276,7 @@ TELEMETRY <%= target_name %> FileHandling.fileManager.Errors BIG_ENDIAN "The tot
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM Errors 32 UINT "The total number of errors"
     META FPRIME_TYPE "U32Type"
@@ -1294,7 +1294,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.rateGroup1.RgMaxTime BIG_ENDIA
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM RgMaxTime 32 UINT "Max execution time rate group"
     FORMAT_STRING "%s us"
@@ -1313,7 +1313,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.rateGroup1.RgCycleSlips BIG_EN
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM RgCycleSlips 32 UINT "Cycle slips for rate group"
     META FPRIME_TYPE "U32Type"
@@ -1331,7 +1331,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.rateGroup2.RgMaxTime BIG_ENDIA
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM RgMaxTime 32 UINT "Max execution time rate group"
     FORMAT_STRING "%s us"
@@ -1350,7 +1350,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.rateGroup2.RgCycleSlips BIG_EN
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM RgCycleSlips 32 UINT "Cycle slips for rate group"
     META FPRIME_TYPE "U32Type"
@@ -1368,7 +1368,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.rateGroup3.RgMaxTime BIG_ENDIA
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM RgMaxTime 32 UINT "Max execution time rate group"
     FORMAT_STRING "%s us"
@@ -1387,7 +1387,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.rateGroup3.RgCycleSlips BIG_EN
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM RgCycleSlips 32 UINT "Cycle slips for rate group"
     META FPRIME_TYPE "U32Type"
@@ -1405,7 +1405,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.cmdSeq.CS_LoadCommands BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CS_LoadCommands 32 UINT "The number of Load commands executed"
     META FPRIME_TYPE "U32Type"
@@ -1423,7 +1423,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.cmdSeq.CS_CancelCommands BIG_E
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CS_CancelCommands 32 UINT "The number of Cancel commands executed"
     META FPRIME_TYPE "U32Type"
@@ -1441,7 +1441,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.cmdSeq.CS_Errors BIG_ENDIAN "T
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CS_Errors 32 UINT "The number of errors that have occurred"
     META FPRIME_TYPE "U32Type"
@@ -1459,7 +1459,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.cmdSeq.CS_CommandsExecuted BIG
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CS_CommandsExecuted 32 UINT "The number of commands executed across all sequences."
     META FPRIME_TYPE "U32Type"
@@ -1477,7 +1477,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.cmdSeq.CS_SequencesCompleted B
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CS_SequencesCompleted 32 UINT "The number of sequences completed."
     META FPRIME_TYPE "U32Type"
@@ -1495,7 +1495,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.MEMORY_TOTAL B
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM MEMORY_TOTAL 64 UINT "Total system memory in KB"
     FORMAT_STRING "%s KB"
@@ -1514,7 +1514,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.MEMORY_USED BI
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM MEMORY_USED 64 UINT "System memory used in KB"
     FORMAT_STRING "%s KB"
@@ -1533,7 +1533,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.NON_VOLATILE_T
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NON_VOLATILE_TOTAL 64 UINT "System non-volatile available in KB"
     FORMAT_STRING "%s KB"
@@ -1552,7 +1552,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.NON_VOLATILE_F
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM NON_VOLATILE_FREE 64 UINT "System non-volatile available in KB"
     FORMAT_STRING "%s KB"
@@ -1571,7 +1571,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU BIG_ENDIAN
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1590,7 +1590,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_00 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_00 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1609,7 +1609,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_01 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_01 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1628,7 +1628,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_02 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_02 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1647,7 +1647,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_03 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_03 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1666,7 +1666,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_04 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_04 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1685,7 +1685,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_05 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_05 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1704,7 +1704,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_06 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_06 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1723,7 +1723,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_07 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_07 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1742,7 +1742,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_08 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_08 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1761,7 +1761,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_09 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_09 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1780,7 +1780,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_10 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_10 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1799,7 +1799,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_11 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_11 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1818,7 +1818,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_12 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_12 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1837,7 +1837,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_13 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_13 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1856,7 +1856,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_14 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_14 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
@@ -1875,7 +1875,7 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_15 BIG_END
   APPEND_ITEM FPRIME_TIME_CONTEXT 8 UINT "F Prime time context"
   APPEND_ITEM FPRIME_TIME_SECONDS 32 UINT "F Prime time seconds"
   APPEND_ITEM FPRIME_TIME_USECONDS 32 UINT "F Prime time microseconds"
-  ITEM PACKET_TIME 0 0 DERIVED "F Prime timestamp"
+  ITEM FPRIME_TIME 0 0 DERIVED "F Prime time as Unix time (valid for TB_WORKSTATION_TIME)"
     READ_CONVERSION openc3/conversions/unix_time_conversion.py FPRIME_TIME_SECONDS FPRIME_TIME_USECONDS
   APPEND_ITEM CPU_15 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"

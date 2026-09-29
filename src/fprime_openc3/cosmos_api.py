@@ -68,6 +68,10 @@ class CosmosClient:
     def find_plugin(self, prefix: str) -> str | None:
         return next((name for name in self.plugins() if name.startswith(prefix)), None)
 
+    def plugin(self, name: str) -> dict:
+        """Hash of an installed plugin, including its variables as COSMOS stored them"""
+        return self._request("GET", f"/plugins/{name}").json()
+
     def upload(self, gem_path: str, existing: str | None = None) -> dict:
         """Phase 1: upload the gem and return the plugin hash COSMOS proposes"""
         with open(gem_path, "rb") as gem:
