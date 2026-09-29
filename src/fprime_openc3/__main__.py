@@ -104,10 +104,11 @@ def ensure_installed(
     if existing and existing.startswith(f"{artifacts.plugin_prefix}.gem__") and not force:
         print(f"[INFO] COSMOS target {target} already runs {existing}; skipping install (--force-install overrides)")
         return
-    action = f"Upgrading {existing}" if existing else "Installing"
-    print(f"[INFO] {action} {artifacts.gem_path.name} into COSMOS scope {client.scope}")
-    name = client.install_gem(str(artifacts.gem_path), variables, existing)
-    print(f"[INFO] Installed {name}")
+    gem = artifacts.gem_path.name
+    action = f"Upgrading {existing} to {gem}" if existing else f"Installing {gem}"
+    print(f"[INFO] {action} in COSMOS scope {client.scope}")
+    client.install_gem(str(artifacts.gem_path), variables, existing)
+    print(f"[INFO] Target {target} now runs {gem}")
 
 
 def docker_interfaces() -> list[tuple[str, str]]:
