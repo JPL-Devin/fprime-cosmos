@@ -10,8 +10,9 @@ from fprime_cosmos.plugin_builder import PluginArtifacts
 class FakeClient:
     scope = "DEFAULT"
 
-    def __init__(self, installed):
+    def __init__(self, installed, variables=None):
         self.installed = installed
+        self.variables = variables or {}
         self.installs = []
 
     def authenticate(self):
@@ -21,7 +22,8 @@ class FakeClient:
         return list(self.installed)
 
     def plugin(self, name):
-        return {"variables": {"fprime_target_name": {"value": self.installed[name]}}}
+        variables = {name: {"value": value} for name, value in self.variables.items()}
+        return {"variables": {"fprime_target_name": {"value": self.installed[name]}, **variables}}
 
     def install_gem(self, gem_path, variables, existing):
         self.installs.append((gem_path, variables, existing))
@@ -67,6 +69,16 @@ def test_ensure_installed_skips_same_digest_and_upgrades_target_owner(tmp_path):
     client = FakeClient({})
     install.ensure_installed(client, artifacts(tmp_path), {"fprime_bridge_port": "1"}, "FPRIME", force=False)
     assert client.installs[-1][1:] == ({"fprime_bridge_port": "1"}, None)
+
+
+def test_ensure_installed_applies_changed_variables_to_same_gem(tmp_path):
+    same = "openc3-cosmos-fprime-ref-1.0.0.abc.gem__3"
+    client = FakeClient({same: "FPRIME"}, variables={"fprime_bridge_host": "10.0.0.1", "fprime_bridge_port": 50001})
+    install.ensure_installed(client, artifacts(tmp_path), {"fprime_bridge_port": "50001"}, "FPRIME", force=False)
+    assert client.installs == []
+    variables = {"fprime_bridge_host": "192.168.1.5"}
+    install.ensure_installed(client, artifacts(tmp_path), variables, "FPRIME", force=False)
+    assert client.installs == [(str(artifacts(tmp_path).gem_path), variables, same)]
 
 
 def test_install_from_arguments_uses_cosmos_options(tmp_path, monkeypatch):

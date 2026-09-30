@@ -80,8 +80,11 @@ def launches(monkeypatch):
         def __init__(self, name):
             self.name = name
 
+        returncode = 0
+
         def wait(self):
             started.append(("wait", self.name))
+            return self.returncode
 
     def launch_process(command, name=None, **kwargs):
         started.append(("bridge", command))
@@ -150,6 +153,28 @@ def test_launcher_installs_unless_skipped(tmp_path, launches, monkeypatch):
     assert launcher.main(argv) == 0
     assert installed[0].gem_path.is_file()
     assert [entry[0] for entry in launches] == ["bridge", "wait"]
+
+
+def test_launcher_skips_app_without_a_connection(tmp_path, launches, capsys):
+    (tmp_path / "bin").mkdir()
+    (tmp_path / "bin" / "Ref").write_text("#!/bin/sh\n")
+    argv = launcher_argv(tmp_path, "-d", str(tmp_path), "--communication-selection", "tcp-fast-client")
+    assert launcher.main(argv) == 0
+    assert [entry[0] for entry in launches] == ["bridge", "wait"]
+    assert "cannot be auto-launched with the tcp-fast-client adapter" in capsys.readouterr().out
+    argv = launcher_argv(
+        tmp_path, "-d", str(tmp_path), "--communication-selection", "uart", "--application-arguments", "serial"
+    )
+    assert launcher.main(argv) == 0
+    assert [entry[0] for entry in launches[2:]] == ["bridge", "app", "wait"]
+
+
+def test_launcher_reports_bridge_failure(tmp_path, launches, monkeypatch):
+    bridge = launcher.launch_process(["x"], name="bridge")
+    bridge.returncode = 2
+    monkeypatch.setattr(launcher, "launch_process", lambda *args, **kwargs: bridge)
+    launches.clear()
+    assert launcher.main(launcher_argv(tmp_path, "-n")) == 1
 
 
 def test_launcher_rejects_missing_app(tmp_path):

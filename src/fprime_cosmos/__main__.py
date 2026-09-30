@@ -205,19 +205,26 @@ def main(arguments: list[str] | None = None) -> int:
     if args.communication_selection != NO_COMMUNICATION:
         launchers.append(launch_comm_bridge)
     if not args.noapp:
-        launchers.append(launch_deployment_app)
+        if app_connection(args) is not None or args.application_arguments is not None:
+            launchers.append(launch_deployment_app)
+        else:
+            print(
+                f"[WARNING] App cannot be auto-launched with the {args.communication_selection} adapter without "
+                "--application-arguments; start it manually"
+            )
     if not launchers:
         return 0
     try:
         processes = [launcher(args) for launcher in launchers]
         print("[INFO] F Prime deployment and COSMOS bridge running. CTRL-C to shutdown all components.")
-        processes[0].wait()  # the bridge (or the deployment without one); the rest are stopped at exit
+        status = processes[0].wait()  # the bridge (or the deployment without one); the rest are stopped at exit
     except KeyboardInterrupt:
         print("[INFO] CTRL-C received. Exiting.")
+        return 0
     except Exception as error:  # noqa: BLE001 - launch failures are reported, then the launcher exits
         print(f"[ERROR] {error}", file=sys.stderr)
         return 1
-    return 0
+    return 0 if not status else 1
 
 
 if __name__ == "__main__":

@@ -75,15 +75,26 @@ def installed_plugin_for_target(client: CosmosClient, target: str) -> str | None
     return None
 
 
+def variables_match(client: CosmosClient, plugin: str, variables: dict[str, str]) -> bool:
+    """True when the installed plugin already carries every requested variable value"""
+    installed = client.plugin(plugin).get("variables", {})
+    return all(str(variable_value(installed.get(name))) == str(value) for name, value in variables.items())
+
+
 def ensure_installed(
     client: CosmosClient, artifacts: PluginArtifacts, variables: dict[str, str], target: str, force: bool
 ) -> None:
-    """Install the gem unless a plugin with the same plugin digest already serves the target"""
+    """Install the gem unless a plugin with the same plugin digest and variables already serves the target"""
     client.authenticate()
     existing = installed_plugin_for_target(client, target)
-    if existing and existing.startswith(f"{artifacts.plugin_prefix}.gem__") and not force:
-        print(f"[INFO] COSMOS target {target} already runs {existing}; skipping install (--force-install overrides)")
-        return
+    same_gem = existing is not None and existing.startswith(f"{artifacts.plugin_prefix}.gem__")
+    if same_gem and not force:
+        if variables_match(client, existing, variables):
+            print(
+                f"[INFO] COSMOS target {target} already runs {existing}; skipping install (--force-install overrides)"
+            )
+            return
+        print(f"[INFO] Plugin variables changed for {existing}")
     gem = artifacts.gem_path.name
     action = f"Upgrading {existing} to {gem}" if existing else f"Installing {gem}"
     print(f"[INFO] {action} in COSMOS scope {client.scope}")

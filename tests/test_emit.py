@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from fprime_cosmos import emit
+from fprime_cosmos.dictionary import DictionaryError
 from fprime_cosmos.items import CosmosItem
 
 GOLDEN = Path(__file__).parent / "golden"
@@ -72,10 +73,34 @@ def test_packetized_packet_ids(reference_dictionary):
         ("{:08x}", "%08x"),
         ("{:>10}", None),
         ("{:.2e}", "%.2e"),
+        ("{} %", "%s %%"),
+        ("{:.2f}%", "%.2f%%"),
+        ("{{{}}}", "{%s}"),
+        ("100%", "100%%"),
     ],
 )
 def test_printf_format(python, printf):
     assert emit.printf_format(python) == printf
+
+
+@pytest.mark.parametrize("name", ["a<%= x %>", "a b", "a\nb", "1abc", ""])
+def test_identifier_rejects_unsafe_names(name):
+    with pytest.raises(DictionaryError):
+        emit.identifier(name)
+
+
+def test_identifier_accepts_flattened_names():
+    assert emit.identifier("Ref.recvBuffComp.PktState.member[3]") == "Ref.recvBuffComp.PktState.member[3]"
+    with pytest.raises(DictionaryError):
+        emit.number("1e308 ")
+
+
+def test_catch_all_is_last_in_packets(reference_dictionary):
+    channels = emit.emit_channels(reference_dictionary)
+    packets = emit.emit_packets(reference_dictionary)
+    assert emit.UNKNOWN_PACKET not in channels
+    definitions = re.findall(rf"^TELEMETRY {re.escape(emit.TARGET)} (\S+)", packets, re.MULTILINE)
+    assert definitions[-1] == emit.UNKNOWN_PACKET and len(definitions) > 1
 
 
 def test_quote_flattens_whitespace_and_quotes():

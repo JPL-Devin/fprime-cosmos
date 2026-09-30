@@ -18,6 +18,7 @@ STATIC_TARGET = "FPRIME"
 GEM_NAME_PREFIX = "openc3-cosmos-fprime"
 COSMOS_MINIMUM_VERSION = "6.10.0"
 BASE_VERSION = "1.0.0"
+TARGET_NAME = re.compile(r"[A-Za-z0-9_]+")
 
 
 @dataclass(frozen=True)
@@ -57,6 +58,8 @@ def version_for(directory: Path) -> str:
 
 def write_plugin(dictionary: FprimeDictionary, output: Path, target_name: str = STATIC_TARGET) -> Path:
     """Write the plugin source tree under output and return the plugin directory"""
+    if not TARGET_NAME.fullmatch(target_name):
+        raise ValueError(f"Target name {target_name!r} must be letters, digits and underscores")
     output = Path(output)
     if output.exists():
         shutil.rmtree(output)
@@ -70,8 +73,7 @@ def write_plugin(dictionary: FprimeDictionary, output: Path, target_name: str = 
     cmd_tlm.mkdir()
     (cmd_tlm / "commands.txt").write_text(emit.emit_commands(dictionary))
     (cmd_tlm / "channels.txt").write_text(emit.emit_channels(dictionary))
-    if dictionary.packets:
-        (cmd_tlm / "packets.txt").write_text(emit.emit_packets(dictionary))
+    (cmd_tlm / "packets.txt").write_text(emit.emit_packets(dictionary))
     plugin_txt = output / "plugin.txt"
     plugin_txt.write_text(
         plugin_txt.read_text().replace(

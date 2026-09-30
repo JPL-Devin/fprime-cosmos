@@ -1880,20 +1880,3 @@ TELEMETRY <%= target_name %> FprimeYamcsReference.systemResources.CPU_15 BIG_END
   APPEND_ITEM CPU_15 32 FLOAT "System's CPU Percentage"
     FORMAT_STRING "%.2f percent"
     META FPRIME_TYPE "F32Type"
-
-TELEMETRY <%= target_name %> FPRIME_UNKNOWN BIG_ENDIAN "F Prime packets not handled by this plugin (events, files, data products)"
-  CATCHALL
-  APPEND_ITEM FPRIME_DESCRIPTOR 16 UINT "F Prime packet descriptor"
-    META FPRIME_TYPE "FwPacketDescriptorType"
-    STATE FW_PACKET_COMMAND 0
-    STATE FW_PACKET_TELEM 1
-    STATE FW_PACKET_LOG 2
-    STATE FW_PACKET_FILE 3
-    STATE FW_PACKET_PACKETIZED_TLM 4
-    STATE FW_PACKET_DP 5
-    STATE FW_PACKET_IDLE 6
-    STATE FW_PACKET_HAND 254
-    STATE FW_PACKET_UNKNOWN 255
-    STATE SPP_IDLE_PACKET 2047
-    STATE INVALID_UNINITIALIZED 2048
-  APPEND_ITEM DATA 0 BLOCK "Remaining packet bytes"

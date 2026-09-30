@@ -11,6 +11,7 @@ alongside the parent packet.
 
 from openc3.subpacketizers.subpacketizer import Subpacketizer
 from openc3.system.system import System
+from openc3.utilities.logger import Logger
 
 
 class FprimeSubpacketizer(Subpacketizer):
@@ -20,6 +21,9 @@ class FprimeSubpacketizer(Subpacketizer):
         while channels:
             subpacket = System.telemetry.identify(channels, target_names=[packet.target_name], subpackets=True)
             if subpacket is None:
+                Logger.warn(
+                    f"{packet.target_name} {packet.packet_name}: unknown channel record, {len(channels)} bytes left"
+                )
                 break
             subpacket.buffer = channels
             length = record_length(subpacket)
