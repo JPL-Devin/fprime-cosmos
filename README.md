@@ -1,2 +1,2 @@
-# fprime-openc3: Tools to Make Open C3 Integration Easier
+# fprime-cosmos: Tools to Make Open C3 COSMOS Integration Easier
 
