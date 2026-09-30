@@ -17,7 +17,7 @@ from fprime_gds.common.models.serialize.serializable_type import SerializableTyp
 from fprime_gds.common.models.serialize.string_type import StringType
 from fprime_gds.common.models.serialize.type_base import BaseType
 
-from fprime_openc3.dictionary import WireLayout
+from fprime_cosmos.dictionary import WireLayout
 
 BOOL_STATES = ("FALSE", "TRUE")
 

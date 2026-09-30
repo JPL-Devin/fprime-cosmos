@@ -1,4 +1,4 @@
-"""fprime-openc3: install the generated COSMOS plugin and run fprime-comm-bridge
+"""fprime-cosmos: install the generated COSMOS plugin and run fprime-comm-bridge
 
 The plugin is regenerated from the dictionary on every run. COSMOS is only asked to install it when the
 dictionary digest differs from the plugin already installed, so repeated launches are quick. Arguments
@@ -17,11 +17,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-from fprime_openc3.cosmos_api import CosmosApiError, CosmosClient
-from fprime_openc3.dictionary import DictionaryError, FprimeDictionary
-from fprime_openc3.generate.__main__ import add_dictionary_arguments
-from fprime_openc3.items import UnsupportedTypeError
-from fprime_openc3.plugin_builder import GEM_NAME_PREFIX, PluginArtifacts, build_plugin
+from fprime_cosmos.cosmos_api import CosmosApiError, CosmosClient
+from fprime_cosmos.dictionary import DictionaryError, FprimeDictionary
+from fprime_cosmos.generate.__main__ import add_dictionary_arguments
+from fprime_cosmos.items import UnsupportedTypeError
+from fprime_cosmos.plugin_builder import GEM_NAME_PREFIX, PluginArtifacts, build_plugin
 
 BRIDGE_EXECUTABLE = "fprime-comm-bridge"
 BRIDGE_MODULE = "fprime_gds.executables.comm_bridge"
@@ -36,7 +36,7 @@ PASSWORD_ENVIRONMENT = "OPENC3_API_PASSWORD"  # noqa: S105 - name of the variabl
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="fprime-openc3", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+        prog="fprime-cosmos", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--dictionary", type=Path, required=True, help="F Prime JSON topology dictionary")
     add_dictionary_arguments(parser)

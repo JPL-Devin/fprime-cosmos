@@ -5,8 +5,8 @@ import json
 import pytest
 import requests
 
-from fprime_openc3 import cosmos_api
-from fprime_openc3.cosmos_api import CosmosApiError, CosmosClient
+from fprime_cosmos import cosmos_api
+from fprime_cosmos.cosmos_api import CosmosApiError, CosmosClient
 
 
 class FakeResponse:

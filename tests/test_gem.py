@@ -7,7 +7,7 @@ import tarfile
 
 import pytest
 
-from fprime_openc3.gem import GemSpec, build_gem, yaml_string
+from fprime_cosmos.gem import GemSpec, build_gem, yaml_string
 
 
 @pytest.fixture

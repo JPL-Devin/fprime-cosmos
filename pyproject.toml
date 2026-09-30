@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fprime-openc3"
+name = "fprime-cosmos"
 dynamic = ["version"]
 description = "F Prime / OpenC3 COSMOS: generates and installs a native COSMOS plugin from an F Prime dictionary"
 readme = "README.md"
@@ -24,17 +24,17 @@ dependencies = [
 dev = ["pytest", "ruff", "build"]
 
 [project.scripts]
-fprime-to-openc3 = "fprime_openc3.generate.__main__:main"
-fprime-openc3 = "fprime_openc3.__main__:main"
+fprime-to-cosmos = "fprime_cosmos.generate.__main__:main"
+fprime-cosmos = "fprime_cosmos.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/fprime-community/fprime-openc3"
+Homepage = "https://github.com/fprime-community/fprime-cosmos"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-fprime_openc3 = ["plugin/**/*"]
+fprime_cosmos = ["plugin/**/*"]
 
 [tool.setuptools_scm]
 fallback_version = "0.1.0.dev0"

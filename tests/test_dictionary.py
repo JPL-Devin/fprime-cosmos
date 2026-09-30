@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from fprime_openc3.dictionary import DictionaryError, FprimeDictionary
+from fprime_cosmos.dictionary import DictionaryError, FprimeDictionary
 from tests.conftest import REFERENCE_DICTIONARY
 
 

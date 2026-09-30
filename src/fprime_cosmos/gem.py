@@ -69,9 +69,9 @@ class GemSpec:
     version: str
     summary: str
     description: str
-    author: str = "fprime-openc3"
+    author: str = "fprime-cosmos"
     email: str = "fprime@jpl.nasa.gov"
-    homepage: str = "https://github.com/fprime-community/fprime-openc3"
+    homepage: str = "https://github.com/fprime-community/fprime-cosmos"
     license: str = "Apache-2.0"
     metadata: dict[str, str] = field(default_factory=dict)
 

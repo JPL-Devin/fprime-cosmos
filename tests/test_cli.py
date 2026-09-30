@@ -2,8 +2,8 @@
 
 import pytest
 
-from fprime_openc3 import __main__ as launcher
-from fprime_openc3.generate.__main__ import main as generate_main
+from fprime_cosmos import __main__ as launcher
+from fprime_cosmos.generate.__main__ import main as generate_main
 from tests.conftest import REFERENCE_DICTIONARY
 
 

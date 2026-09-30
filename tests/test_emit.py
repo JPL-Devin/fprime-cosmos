@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from fprime_openc3 import emit
-from fprime_openc3.items import CosmosItem
+from fprime_cosmos import emit
+from fprime_cosmos.items import CosmosItem
 
 GOLDEN = Path(__file__).parent / "golden"
 EMITTERS = {"commands.txt": emit.emit_commands, "channels.txt": emit.emit_channels, "packets.txt": emit.emit_packets}

@@ -8,8 +8,8 @@ from fprime_gds.common.models.serialize.numerical_types import F64Type, I16Type,
 from fprime_gds.common.models.serialize.serializable_type import SerializableType
 from fprime_gds.common.models.serialize.string_type import StringType
 
-from fprime_openc3.dictionary import WireLayout
-from fprime_openc3.items import CosmosItem, UnsupportedTypeError, flatten
+from fprime_cosmos.dictionary import WireLayout
+from fprime_cosmos.items import CosmosItem, UnsupportedTypeError, flatten
 
 LAYOUT = WireLayout(
     descriptor_bits=16,

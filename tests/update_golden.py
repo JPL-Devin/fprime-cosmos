@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from fprime_openc3 import emit
-from fprime_openc3.dictionary import FprimeDictionary
+from fprime_cosmos import emit
+from fprime_cosmos.dictionary import FprimeDictionary
 
 HERE = Path(__file__).parent
 

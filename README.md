@@ -1,8 +1,8 @@
-# fprime-openc3
+# fprime-cosmos: Tools to Make Open C3 COSMOS Integration Easier
 
 Runs an [F Prime](https://github.com/nasa/fprime) deployment against [OpenC3 COSMOS](https://openc3.com).
 
-`fprime-openc3` reads the F Prime JSON topology dictionary, generates a native COSMOS plugin (commands,
+`fprime-cosmos` reads the F Prime JSON topology dictionary, generates a native COSMOS plugin (commands,
 channelized telemetry and packetized telemetry), installs it into a running COSMOS through the plugin API,
 and starts `fprime-comm-bridge` (from `fprime-gds`) to move packets between the flight software and COSMOS.
 No Ruby toolchain, no hand-edited plugin files and no knowledge of COSMOS internals are required.
@@ -15,7 +15,7 @@ F Prime deployment  <-- framing / transport -->  fprime-comm-bridge  <-- UDP, F 
 ## Installation
 
 ```bash
-pip install fprime-openc3
+pip install fprime-cosmos
 ```
 
 This pulls in `fprime-gds`, which provides the dictionary loaders and `fprime-comm-bridge`. Until an
@@ -45,7 +45,7 @@ machine. The default `--cosmos-url` is plain HTTP on `localhost`; use an `https:
 
    ```bash
    export OPENC3_API_PASSWORD=...
-   fprime-openc3 --dictionary build-artifacts/Linux/MyDeployment/dict/MyDeploymentTopologyDictionary.json
+   fprime-cosmos --dictionary build-artifacts/Linux/MyDeployment/dict/MyDeploymentTopologyDictionary.json
    ```
 
    The launcher
@@ -59,8 +59,8 @@ machine. The default `--cosmos-url` is plain HTTP on `localhost`; use an `https:
    configured exactly as for the GDS, for example:
 
    ```bash
-   fprime-openc3 --dictionary ...json --communication-selection tcp-fast-client --tcp-fast-address 192.168.1.10
-   fprime-openc3 --dictionary ...json --framing-selection fprime     # deployment uses F Prime framing
+   fprime-cosmos --dictionary ...json --communication-selection tcp-fast-client --tcp-fast-address 192.168.1.10
+   fprime-cosmos --dictionary ...json --framing-selection fprime     # deployment uses F Prime framing
    ```
 
 3. Open COSMOS: the `FPRIME` target appears with one command per F Prime command, one telemetry packet per
@@ -88,7 +88,7 @@ Plugin variables (all defaults match the bridge defaults):
 | `fprime_bridge_port` | `50001` | Bridge `--udp-fast-recv-port` (commands) |
 | `fprime_cosmos_port` | `50000` | Bridge `--udp-fast-send-port` (telemetry) |
 
-Commands reach the bridge from the COSMOS container addresses. When COSMOS is local, `fprime-openc3` reads
+Commands reach the bridge from the COSMOS container addresses. When COSMOS is local, `fprime-cosmos` reads
 those addresses from `docker ps`/`docker inspect` (plus the Docker bridge gateways) and starts the bridge with
 `--udp-fast-bind-address <docker0 address> --udp-fast-allowed-source <addresses>`, i.e. the bridge listens only
 on the address the containers know as `host.docker.internal` and only accepts datagrams from them (the bridge
@@ -104,7 +104,7 @@ serves upgrades that plugin in place (COSMOS forbids two plugins defining the sa
 ### Generating without installing
 
 ```bash
-fprime-to-openc3 MyDeploymentTopologyDictionary.json -o openc3-plugin [--target-name NAME] [--no-gem]
+fprime-to-cosmos MyDeploymentTopologyDictionary.json -o openc3-plugin [--target-name NAME] [--no-gem]
 ```
 
 writes `openc3-plugin/openc3-cosmos-fprime-<deployment>/` and the corresponding `.gem`, which can be installed

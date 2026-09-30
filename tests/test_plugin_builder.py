@@ -3,7 +3,7 @@
 import gzip
 import tarfile
 
-from fprime_openc3.plugin_builder import build_plugin, gem_name_for, slug, version_for
+from fprime_cosmos.plugin_builder import build_plugin, gem_name_for, slug, version_for
 
 
 def test_names(reference_dictionary):

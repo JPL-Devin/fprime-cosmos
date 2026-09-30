@@ -1,4 +1,4 @@
-"""fprime-to-openc3: generate a COSMOS plugin (directory and gem) from an F Prime dictionary"""
+"""fprime-to-cosmos: generate a COSMOS plugin (directory and gem) from an F Prime dictionary"""
 
 from __future__ import annotations
 
@@ -6,9 +6,9 @@ import argparse
 import sys
 from pathlib import Path
 
-from fprime_openc3.dictionary import DictionaryError, FprimeDictionary
-from fprime_openc3.items import UnsupportedTypeError
-from fprime_openc3.plugin_builder import STATIC_TARGET, build_plugin
+from fprime_cosmos.dictionary import DictionaryError, FprimeDictionary
+from fprime_cosmos.items import UnsupportedTypeError
+from fprime_cosmos.plugin_builder import STATIC_TARGET, build_plugin
 
 
 def add_dictionary_arguments(parser: argparse.ArgumentParser) -> None:
@@ -21,7 +21,7 @@ def add_dictionary_arguments(parser: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="fprime-to-openc3", description=__doc__)
+    parser = argparse.ArgumentParser(prog="fprime-to-cosmos", description=__doc__)
     parser.add_argument("dictionary", type=Path, help="F Prime JSON topology dictionary")
     parser.add_argument(
         "-o", "--output", type=Path, default=Path("openc3-plugin"), help="Output directory (default: %(default)s)"

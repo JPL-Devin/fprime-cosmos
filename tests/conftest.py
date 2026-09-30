@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from fprime_openc3.dictionary import FprimeDictionary
+from fprime_cosmos.dictionary import FprimeDictionary
 
 DATA = Path(__file__).parent / "data"
 REFERENCE_DICTIONARY = DATA / "ReferenceDeploymentTopologyDictionary.json"
