@@ -1,8 +1,7 @@
 """Installing a built plugin into COSMOS: shared by fprime-to-cosmos --install and fprime-cosmos"""
 
-import argparse
-
 import pytest
+from fprime_gds.executables.cli import ParserBase
 
 from fprime_cosmos import install
 from fprime_cosmos.plugin_builder import PluginArtifacts
@@ -78,13 +77,13 @@ def test_install_from_arguments_uses_cosmos_options(tmp_path, monkeypatch):
         return FakeClient({})
 
     monkeypatch.setattr(install, "CosmosClient", fake_client)
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--target-name", default="FPRIME")
-    install.add_cosmos_arguments(parser)
-    args = parser.parse_args(
-        ["--cosmos-url", "http://c:2900", "--cosmos-password", "pw", "--cosmos-variable", "fprime_target_name=REF"]
+    args, _ = ParserBase.parse_args(
+        [install.CosmosParser],
+        "test",
+        ["--cosmos-url", "http://c:2900", "--cosmos-password", "pw", "--cosmos-variable", "fprime_target_name=REF"],
     )
+    assert args.cosmos_variables == {"fprime_target_name": "REF"}
     install.install_from_arguments(args, artifacts(tmp_path))
     assert created == {"url": "http://c:2900", "password": "pw", "scope": "DEFAULT"}
-    with pytest.raises(ValueError):
-        install.install_from_arguments(parser.parse_args(["--cosmos-variable", "broken"]), artifacts(tmp_path))
+    with pytest.raises(SystemExit):
+        ParserBase.parse_args([install.CosmosParser], "test", ["--cosmos-variable", "broken"])

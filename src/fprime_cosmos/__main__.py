@@ -1,75 +1,102 @@
-"""fprime-cosmos: start an F Prime deployment against COSMOS
+"""fprime-cosmos: run an F Prime deployment against COSMOS, with the fprime-gds command line
 
-Generates the COSMOS plugin from the dictionary, installs it when COSMOS does not already run a plugin
-built from the same dictionary digest, starts fprime-comm-bridge and, with --app, the deployment binary
-connected to the bridge. Arguments not recognized here are forwarded to fprime-comm-bridge (for example
---communication-selection or --tcp-fast-port).
+A drop-in for `fprime-gds`/`fprime-yamcs`: the dictionary, deployment, application and logging options
+(-d/--deployment, --dictionary, --app, -n/--no-app, --application-arguments, -l/--logs, ...) and the
+communication/framing plugin options are the fprime-gds ones. The launcher generates the COSMOS plugin from
+the dictionary, installs it when COSMOS does not already run a plugin built from the same dictionary digest,
+starts fprime-comm-bridge with the selected communication adapter and framing, and then starts the
+deployment connected to the bridge.
 """
 
 from __future__ import annotations
 
-import argparse
-import importlib.util
 import ipaddress
-import shlex
-import shutil
 import socket
 import subprocess
 import sys
-import time
 from pathlib import Path
+from typing import Any
+
+from fprime_gds.common.communication.adapters.udp_fast import UdpFastAdapter
+from fprime_gds.executables.cli import (
+    BinaryDeployment,
+    ConfigDrivenParser,
+    DictionaryParser,
+    LogDeployParser,
+    ParserBase,
+    PluginArgumentParser,
+)
+from fprime_gds.executables.run_deployment import BASE_MODULE_ARGUMENTS, app_connection, launch_app, launch_process
+from fprime_gds.plugin.system import Plugins
 
 from fprime_cosmos.cosmos_api import CosmosApiError
 from fprime_cosmos.dictionary import DictionaryError, FprimeDictionary
-from fprime_cosmos.generate.__main__ import add_dictionary_arguments
-from fprime_cosmos.install import add_cosmos_arguments, install_from_arguments
+from fprime_cosmos.install import CosmosParser, install_from_arguments
 from fprime_cosmos.items import UnsupportedTypeError
 from fprime_cosmos.plugin_builder import build_plugin
 
-BRIDGE_EXECUTABLE = "fprime-comm-bridge"
+DESCRIPTION = "Run an F Prime deployment with COSMOS"
 BRIDGE_MODULE = "fprime_gds.executables.comm_bridge"
+LAUNCHER_PLUGIN_CATEGORIES = ["communication", "framing"]
+# fprime-comm-bridge defaults: the deployment's TcpClient connects to the bridge's tcp-fast-server; COSMOS
+# receives plain F Prime packets, so Space Packet and Space Data Link framing is stripped in the bridge
+DEFAULT_COMMUNICATION = "tcp-fast-server"
+DEFAULT_FRAMING = "space-packet-space-data-link"
+NO_COMMUNICATION = "none"
+BRIDGE_LAUNCH_TIME = 1  # seconds the bridge must stay up before the deployment connects to it
 DOCKER_INTERFACE_PREFIXES = ("docker", "br-")
 DOCKER_HOST_INTERFACE = "docker"  # host.docker.internal resolves to the default bridge (docker0) gateway
 BIND_ANY = "0.0.0.0"  # noqa: S104 - last resort when the Docker host address cannot be determined
-# COSMOS receives plain F Prime packets, so the bridge strips Space Packet and Space Data Link framing
-DEFAULT_FRAMING = "space-packet-space-data-link"
-# fprime-comm-bridge defaults: a tcp-fast-server the deployment's TcpClient connects to
-TCP_FAST_ADDRESS_OPTION = "--tcp-fast-address"
-TCP_FAST_PORT_OPTION = "--tcp-fast-port"
-TCP_FAST_DEFAULT_PORT = "50000"
 LOOPBACK = "127.0.0.1"
-UNSPECIFIED_ADDRESSES = ("", "0.0.0.0", "::")  # noqa: S104 - recognised, not bound
-APP_START_DELAY = 1.0  # let the bridge open its server socket before the deployment connects
-SHUTDOWN_TIMEOUT = 5.0
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="fprime-cosmos", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    parser.add_argument("--dictionary", type=Path, required=True, help="F Prime JSON topology dictionary")
-    add_dictionary_arguments(parser)
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=Path("openc3-plugin"),
-        help="Where the plugin is generated (default: %(default)s)",
-    )
-    cosmos = add_cosmos_arguments(parser)
-    cosmos.add_argument("--skip-install", action="store_true", help="Generate the plugin but do not talk to COSMOS")
-    bridge = parser.add_argument_group("bridge")
-    bridge.add_argument("--skip-bridge", action="store_true", help="Do not start fprime-comm-bridge")
-    bridge.add_argument(
-        "--framing-selection", default=DEFAULT_FRAMING, help="fprime-comm-bridge framing (default: %(default)s)"
-    )
-    app = parser.add_argument_group("deployment")
-    app.add_argument("--app", type=Path, help="Deployment binary to start once the bridge is up")
-    app.add_argument(
-        "--app-arguments",
-        help="Arguments for --app (default: '-a <bridge tcp-fast address> -p <bridge tcp-fast port>')",
-    )
-    app.add_argument("--logs", type=Path, help="Directory for the deployment log (default: <output>/logs)")
-    return parser
+class CosmosPluginArgumentParser(PluginArgumentParser):
+    """The fprime-gds communication and framing plugin options, defaulting to the bridge's choices"""
+
+    FPRIME_CHOICES = {
+        **PluginArgumentParser.FPRIME_CHOICES,
+        "communication": DEFAULT_COMMUNICATION,
+        "framing": DEFAULT_FRAMING,
+    }
+
+    def __init__(self, plugin_system: Plugins | None = None):
+        super().__init__(plugin_system or Plugins(LAUNCHER_PLUGIN_CATEGORIES))
+
+
+class LauncherParser(ParserBase):
+    """Options specific to the COSMOS launcher"""
+
+    DESCRIPTION = "COSMOS launcher options"
+
+    def get_arguments(self) -> dict[tuple[str, ...], dict[str, Any]]:
+        return {
+            ("--cosmos-plugin-dir",): {
+                "type": Path,
+                "default": Path.cwd() / "openc3-plugin",
+                "help": "Directory the COSMOS plugin and gem are generated into. [default: %(default)s]",
+            },
+            ("--skip-install",): {
+                "action": "store_true",
+                "help": "Generate the plugin but do not install it into COSMOS",
+            },
+        }
+
+    def handle_arguments(self, args, **kwargs):
+        return args
+
+
+def parse_args(arguments: list[str] | None = None):
+    """Parse the fprime-gds style command line plus the COSMOS options"""
+    handlers = [
+        DictionaryParser,
+        BinaryDeployment,
+        LogDeployParser,
+        CosmosPluginArgumentParser,
+        CosmosParser,
+        LauncherParser,
+    ]
+    args, _ = ConfigDrivenParser.parse_args(handlers, DESCRIPTION, arguments)
+    return args
 
 
 def docker_interfaces() -> list[tuple[str, str]]:
@@ -117,120 +144,79 @@ def docker_source_addresses() -> list[str]:
     return list(dict.fromkeys([*docker_container_addresses(), *docker_gateway_addresses()]))
 
 
-def bridge_defaults(cosmos_url: str, extra: list[str]) -> list[str]:
-    """Bridge arguments letting a COSMOS running in local Docker containers reach the bridge
-
-    Only applied when COSMOS is local and the user has not configured the UDP side themselves.
-    """
+def cosmos_is_local(cosmos_url: str) -> bool:
     host = cosmos_url.split("://", 1)[-1].split("/", 1)[0].rsplit(":", 1)[0]
     try:
-        local = host in ("localhost", LOOPBACK) or socket.gethostbyname(host) == socket.gethostbyname(
+        return host in ("localhost", LOOPBACK) or socket.gethostbyname(host) == socket.gethostbyname(
             socket.gethostname()
         )
     except OSError:
-        local = False
-    if not local or any(
-        argument.startswith(("--udp-fast-bind-address", "--udp-fast-allowed-source")) for argument in extra
-    ):
-        return []
+        return False
+
+
+def apply_docker_defaults(args) -> None:
+    """Let a COSMOS running in local Docker containers reach the bridge's UDP side
+
+    Only applied when COSMOS is local and --udp-fast-bind-address/--udp-fast-allowed-source keep their defaults.
+    """
+    if not cosmos_is_local(args.cosmos_url):
+        return
+    if args.udp_fast_bind_address != UdpFastAdapter.DEFAULT_BIND_ADDRESS or args.udp_fast_allowed_sources is not None:
+        return
     sources = docker_source_addresses()
     if not sources:
-        return []
-    bind = docker_host_address() or BIND_ANY
-    return ["--udp-fast-bind-address", bind, "--udp-fast-allowed-source", *sources]
-
-
-def bridge_command() -> list[str] | None:
-    """Prefer the bridge from this interpreter's environment so the launcher works without PATH activation."""
-    if importlib.util.find_spec(BRIDGE_MODULE) is not None:
-        return [sys.executable, "-m", BRIDGE_MODULE]
-    executable = shutil.which(BRIDGE_EXECUTABLE)
-    return None if executable is None else [executable]
-
-
-def option_value(arguments: list[str], option: str, default: str) -> str:
-    """Value of `option` in a forwarded argument list (`--opt value` or `--opt=value`), else `default`"""
-    for index, argument in enumerate(arguments):
-        if argument == option and index + 1 < len(arguments):
-            return arguments[index + 1]
-        if argument.startswith(f"{option}="):
-            return argument.split("=", 1)[1]
-    return default
-
-
-def app_command(app: Path, app_arguments: str | None, bridge_arguments: list[str]) -> list[str]:
-    """The deployment command line: explicit --app-arguments, else connect to the bridge's tcp-fast server"""
-    if app_arguments is not None:
-        return [str(app.resolve()), *shlex.split(app_arguments)]
-    address = option_value(bridge_arguments, TCP_FAST_ADDRESS_OPTION, LOOPBACK)
-    if address in UNSPECIFIED_ADDRESSES:
-        address = LOOPBACK
-    port = option_value(bridge_arguments, TCP_FAST_PORT_OPTION, TCP_FAST_DEFAULT_PORT)
-    return [str(app.resolve()), "-a", address, "-p", port]
-
-
-def stop(process: subprocess.Popen) -> None:
-    if process.poll() is not None:
         return
-    process.terminate()
-    try:
-        process.wait(SHUTDOWN_TIMEOUT)
-    except subprocess.TimeoutExpired:
-        process.kill()
-        process.wait()
+    args.udp_fast_bind_address = docker_host_address() or BIND_ANY
+    args.udp_fast_allowed_sources = sources
 
 
-def run_processes(bridge: list[str], app: list[str] | None, log_directory: Path) -> int:
-    """Run the bridge and, optionally, the deployment until either exits or the user interrupts"""
-    print(f"[INFO] Starting: {' '.join(bridge)}")
-    processes = [subprocess.Popen(bridge)]
-    log = None
-    try:
-        if app is not None:
-            time.sleep(APP_START_DELAY)
-            log_directory.mkdir(parents=True, exist_ok=True)
-            log_path = log_directory / f"{Path(app[0]).name}.log"
-            log = log_path.open("wb")
-            print(f"[INFO] Starting: {' '.join(app)} (log: {log_path})")
-            processes.append(subprocess.Popen(app, cwd=Path(app[0]).parent, stdout=log, stderr=subprocess.STDOUT))
-        while all(process.poll() is None for process in processes):
-            time.sleep(0.5)
-        finished = next(process for process in processes if process.poll() is not None)
-        print(f"[INFO] {Path(finished.args[0]).name} exited with {finished.returncode}; shutting down")
-        return finished.returncode
-    except KeyboardInterrupt:
-        return 0
-    finally:
-        for process in reversed(processes):
-            stop(process)
-        if log is not None:
-            log.close()
+def bridge_arguments(args) -> list[str]:
+    """fprime-comm-bridge command line reproducing the launcher's dictionary and plugin selections"""
+    return ["--dictionary", str(args.dictionary), *CosmosPluginArgumentParser().reproduce_cli_args(args)]
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = build_parser()
-    args, bridge_arguments = parser.parse_known_args(argv)
-    if args.app is not None and not args.app.is_file():
-        parser.error(f"--app {args.app} is not a file")
+def launch_comm_bridge(args):
+    """Start fprime-comm-bridge between the deployment and COSMOS"""
+    apply_docker_defaults(args)
+    command = [*BASE_MODULE_ARGUMENTS, BRIDGE_MODULE, *bridge_arguments(args)]
+    return launch_process(
+        command, name=f"fprime-comm-bridge[{args.communication_selection}]", launch_time=BRIDGE_LAUNCH_TIME
+    )
+
+
+def launch_deployment_app(args):
+    """Start the deployment connected to the bridge's adapter (fprime-gds --application-arguments overrides)"""
+    return launch_app(args, app_connection(args))
+
+
+def main(arguments: list[str] | None = None) -> int:
+    args = parse_args(arguments)
     try:
         dictionary = FprimeDictionary(args.dictionary, args.packet_set_name)
-        artifacts = build_plugin(dictionary, args.output, args.target_name)
+        artifacts = build_plugin(dictionary, args.cosmos_plugin_dir, args.target_name)
         print(f"[INFO] Generated {artifacts.gem_path}")
         if not args.skip_install:
             install_from_arguments(args, artifacts)
     except (DictionaryError, UnsupportedTypeError, CosmosApiError, ValueError) as error:
         print(f"[ERROR] {error}", file=sys.stderr)
         return 1
-    if args.skip_bridge:
+    launchers = []
+    if args.communication_selection != NO_COMMUNICATION:
+        launchers.append(launch_comm_bridge)
+    if not args.noapp:
+        launchers.append(launch_deployment_app)
+    if not launchers:
         return 0
-    bridge = bridge_command()
-    if bridge is None:
-        print(f"[ERROR] {BRIDGE_EXECUTABLE} not found; install fprime-gds", file=sys.stderr)
+    try:
+        processes = [launcher(args) for launcher in launchers]
+        print("[INFO] F Prime deployment and COSMOS bridge running. CTRL-C to shutdown all components.")
+        processes[0].wait()  # the bridge (or the deployment without one); the rest are stopped at exit
+    except KeyboardInterrupt:
+        print("[INFO] CTRL-C received. Exiting.")
+    except Exception as error:  # noqa: BLE001 - launch failures are reported, then the launcher exits
+        print(f"[ERROR] {error}", file=sys.stderr)
         return 1
-    bridge_arguments = [*bridge_defaults(args.cosmos_url, bridge_arguments), *bridge_arguments]
-    bridge += ["--dictionary", str(dictionary.path), "--framing-selection", args.framing_selection, *bridge_arguments]
-    app = None if args.app is None else app_command(args.app, args.app_arguments, bridge_arguments)
-    return run_processes(bridge, app, args.logs or args.output / "logs")
+    return 0
 
 
 if __name__ == "__main__":

@@ -1,51 +1,62 @@
 """fprime-to-cosmos: generate a COSMOS plugin (directory and gem) from an F Prime dictionary
 
-By default the plugin is only written to disk, ready for `openc3cli load` or the COSMOS admin page. With
---install the gem is also uploaded to a running COSMOS through its plugins API.
+The dictionary is identified exactly as for fprime-gds (--dictionary, or detected from -d/--deployment or
+the current F Prime project). By default the plugin is only written to disk, ready for `openc3cli load` or
+the COSMOS admin page. With --install the gem is also uploaded to a running COSMOS through its plugins API.
 """
 
 from __future__ import annotations
 
-import argparse
 import sys
 from pathlib import Path
+from typing import Any
+
+from fprime_gds.executables.cli import ConfigDrivenParser, DictionaryParser, ParserBase
 
 from fprime_cosmos.cosmos_api import CosmosApiError
 from fprime_cosmos.dictionary import DictionaryError, FprimeDictionary
-from fprime_cosmos.install import add_cosmos_arguments, install_from_arguments
+from fprime_cosmos.install import CosmosParser, install_from_arguments
 from fprime_cosmos.items import UnsupportedTypeError
-from fprime_cosmos.plugin_builder import STATIC_TARGET, build_plugin
+from fprime_cosmos.plugin_builder import build_plugin
+
+DESCRIPTION = "Generate a COSMOS plugin from an F Prime dictionary"
 
 
-def add_dictionary_arguments(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
-        "--packet-set-name", help="Telemetry packet set to generate when the dictionary defines several"
-    )
-    parser.add_argument(
-        "--target-name", default=STATIC_TARGET, help="Default COSMOS target name (default: %(default)s)"
-    )
+class GeneratorParser(ParserBase):
+    """Where and what to generate"""
+
+    DESCRIPTION = "Plugin generation options"
+
+    def get_arguments(self) -> dict[tuple[str, ...], dict[str, Any]]:
+        return {
+            ("-o", "--output"): {
+                "type": Path,
+                "default": Path("openc3-plugin"),
+                "help": "Output directory. [default: %(default)s]",
+            },
+            ("--no-gem",): {
+                "action": "store_true",
+                "help": "Write the plugin directory only; do not package a gem",
+            },
+            ("--install",): {
+                "action": "store_true",
+                "help": "Also install the gem into COSMOS",
+            },
+        }
+
+    def handle_arguments(self, args, **kwargs):
+        if args.install and args.no_gem:
+            raise ValueError("--install needs the gem; drop --no-gem")
+        return args
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="fprime-to-cosmos", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    parser.add_argument("dictionary", type=Path, help="F Prime JSON topology dictionary")
-    parser.add_argument(
-        "-o", "--output", type=Path, default=Path("openc3-plugin"), help="Output directory (default: %(default)s)"
-    )
-    parser.add_argument("--no-gem", action="store_true", help="Write the plugin directory only; do not package a gem")
-    add_dictionary_arguments(parser)
-    cosmos = add_cosmos_arguments(parser)
-    cosmos.add_argument("--install", action="store_true", help="Also install the gem into COSMOS")
-    return parser
+def parse_args(arguments: list[str] | None = None):
+    args, _ = ConfigDrivenParser.parse_args([DictionaryParser, CosmosParser, GeneratorParser], DESCRIPTION, arguments)
+    return args
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = build_parser()
-    args = parser.parse_args(argv)
-    if args.install and args.no_gem:
-        parser.error("--install needs the gem; drop --no-gem")
+def main(arguments: list[str] | None = None) -> int:
+    args = parse_args(arguments)
     try:
         dictionary = FprimeDictionary(args.dictionary, args.packet_set_name)
         artifacts = build_plugin(dictionary, args.output, args.target_name, gem=not args.no_gem)

@@ -41,11 +41,12 @@ machine. The default `--cosmos-url` is plain HTTP on `localhost`; use an `https:
          - "127.0.0.1:50000:50000/udp"
    ```
 
-2. Run the launcher with the deployment's dictionary and the COSMOS password:
+2. Run the launcher from the deployment's F Prime project (the same command line as `fprime-gds` and
+   `fprime-yamcs`; the deployment, dictionary and binary are detected from `settings.ini`/`build-artifacts`):
 
    ```bash
    export OPENC3_API_PASSWORD=...
-   fprime-cosmos --dictionary build-artifacts/Linux/MyDeployment/dict/MyDeploymentTopologyDictionary.json
+   fprime-cosmos
    ```
 
    The launcher
@@ -53,17 +54,20 @@ machine. The default `--cosmos-url` is plain HTTP on `localhost`; use an `https:
    - generates the plugin into `./openc3-plugin/` and packages it as a gem,
    - installs (or upgrades) the plugin in COSMOS, skipping the install when the same dictionary is already
      installed (the dictionary digest is part of the gem version),
-   - starts `fprime-comm-bridge` with `--framing-selection space-packet-space-data-link`,
-   - with `--app path/to/MyDeployment`, starts the deployment once the bridge is up, connected to the
-     bridge's `tcp-fast-server` (`-a 127.0.0.1 -p 50000` by default; `--app-arguments` overrides), and stops
-     it again when the bridge exits or on Ctrl-C. The deployment's output goes to `<output>/logs/`.
+   - starts `fprime-comm-bridge` with the selected communication adapter (default `tcp-fast-server`) and framing
+     (default `space-packet-space-data-link`),
+   - starts the deployment connected to the bridge (`-a 127.0.0.1 -p 50000` by default; `--application-arguments`
+     overrides, `-n` skips it), logging it under `logs/fprime-cosmos-<date>/`. Everything is stopped when the
+     bridge exits or on Ctrl-C.
 
-   Anything the launcher does not recognise is forwarded to `fprime-comm-bridge`, so the flight link is
-   configured exactly as for the GDS, for example:
+   All fprime-gds options apply, so the flight link is configured exactly as for the GDS, for example:
 
    ```bash
-   fprime-cosmos --dictionary ...json --communication-selection tcp-fast-client --tcp-fast-address 192.168.1.10
-   fprime-cosmos --dictionary ...json --framing-selection fprime     # deployment uses F Prime framing
+   fprime-cosmos -d build-artifacts/Linux/MyDeployment              # explicit deployment directory
+   fprime-cosmos --dictionary MyDeploymentTopologyDictionary.json -n  # deployment started elsewhere
+   fprime-cosmos --communication-selection tcp-fast-client --tcp-fast-address 192.168.1.10
+   fprime-cosmos --framing-selection fprime                          # deployment uses F Prime framing
+   fprime-cosmos --communication-selection none -n                   # generate and install only
    ```
 
 3. Open COSMOS: the `FPRIME` target appears with one command per F Prime command, one telemetry packet per
@@ -71,19 +75,32 @@ machine. The default `--cosmos-url` is plain HTTP on `localhost`; use an `https:
 
 ### Options
 
+Shared with fprime-gds (`fprime-cosmos --help` lists them all, including the `fprime-gds.yml` configuration file):
+
+| Option | Purpose |
+| --- | --- |
+| `-d`, `--deployment DIR` | Deployment build-artifacts directory (default: detected from `settings.ini`) |
+| `--dictionary PATH` | Dictionary (default: detected from the deployment) |
+| `--packet-set-name NAME` | Packet set to use when the dictionary defines several |
+| `--app PATH`, `-n`, `--no-app` | Deployment binary to start (default: detected), or do not start one |
+| `--application-arguments ...` | Arguments for the deployment (default `-a <bridge address> -p <bridge port>`) |
+| `-l`, `--logs DIR` | Log directory (default `./logs`) |
+| `--communication-selection`, `--tcp-fast-*`, ... | Bridge link to the flight software (default `tcp-fast-server` on port 50000) |
+| `--framing-selection`, `--frame-size`, `--scid`, ... | Bridge framing (default `space-packet-space-data-link`) |
+| `--udp-fast-*` | Bridge link to COSMOS (see below) |
+
+COSMOS specific:
+
 | Option | Purpose |
 | --- | --- |
 | `--target-name NAME` | COSMOS target name (default `FPRIME`) |
-| `--packet-set-name NAME` | Packet set to use when the dictionary defines several |
-| `--app PATH` | Deployment binary to start alongside the bridge |
-| `--app-arguments "..."` | Arguments for `--app` (default `-a <tcp-fast address> -p <tcp-fast port>`) |
-| `--logs DIR` | Where the deployment log is written (default `<output>/logs`) |
+| `--cosmos-plugin-dir DIR` | Where the plugin and gem are generated (default `./openc3-plugin`) |
 | `--cosmos-url URL` | COSMOS base URL (default `http://localhost:2900`) |
 | `--cosmos-password`, `$OPENC3_API_PASSWORD` | COSMOS password (set on first use if COSMOS has none) |
 | `--cosmos-scope SCOPE` | COSMOS scope (default `DEFAULT`) |
 | `--cosmos-variable NAME=VALUE` | Override a plugin variable (see below) |
 | `--force-install` | Reinstall even when the dictionary digest matches |
-| `--skip-install` / `--skip-bridge` | Generate only / do not start the bridge |
+| `--skip-install` | Generate the plugin but do not install it |
 
 Plugin variables (all defaults match the bridge defaults):
 
@@ -99,7 +116,7 @@ those addresses from `docker ps`/`docker inspect` (plus the Docker bridge gatewa
 `--udp-fast-bind-address <docker0 address> --udp-fast-allowed-source <addresses>`, i.e. the bridge listens only
 on the address the containers know as `host.docker.internal` and only accepts datagrams from them (the bridge
 command port is otherwise unauthenticated). Restart the launcher if the containers are recreated with new
-addresses. Passing either option yourself disables this defaulting, for example
+addresses. Setting either option yourself disables this defaulting, for example
 `--udp-fast-bind-address 192.168.1.5 --udp-fast-allowed-source 192.168.1.20` for a remote COSMOS (and set
 `--cosmos-variable fprime_bridge_host=192.168.1.5` so COSMOS sends commands to that address).
 
@@ -110,10 +127,11 @@ serves upgrades that plugin in place (COSMOS forbids two plugins defining the sa
 ### Generating the plugin on its own
 
 ```bash
-fprime-to-cosmos MyDeploymentTopologyDictionary.json -o openc3-plugin [--target-name NAME] [--no-gem] [--install]
+fprime-to-cosmos [--dictionary PATH | -d DEPLOYMENT] -o openc3-plugin [--target-name NAME] [--no-gem] [--install]
 ```
 
-By default this only writes `openc3-plugin/openc3-cosmos-fprime-<deployment>/` and the corresponding `.gem`,
+The dictionary is identified as for the launcher (detected from the F Prime project when neither option is
+given). By default this only writes `openc3-plugin/openc3-cosmos-fprime-<deployment>/` and the corresponding `.gem`,
 which can be installed through the COSMOS Admin tool or `openc3cli load`. With `--install` the gem is also
 installed into COSMOS (same `--cosmos-*`/`--force-install` options as the launcher).
 

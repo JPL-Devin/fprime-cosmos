@@ -4,35 +4,55 @@ from __future__ import annotations
 
 import argparse
 import os
+from typing import Any
+
+from fprime_gds.executables.cli import ParserBase
 
 from fprime_cosmos.cosmos_api import CosmosClient
-from fprime_cosmos.plugin_builder import GEM_NAME_PREFIX, PluginArtifacts
+from fprime_cosmos.plugin_builder import GEM_NAME_PREFIX, STATIC_TARGET, PluginArtifacts
 
 TARGET_VARIABLE = "fprime_target_name"
 PASSWORD_ENVIRONMENT = "OPENC3_API_PASSWORD"  # noqa: S105 - name of the variable, not a secret
 
 
-def add_cosmos_arguments(parser: argparse.ArgumentParser) -> argparse._ArgumentGroup:
-    """COSMOS connection and plugin options; the caller decides whether installing is the default"""
-    cosmos = parser.add_argument_group("COSMOS")
-    cosmos.add_argument("--cosmos-url", default="http://localhost:2900", help="COSMOS base URL (default: %(default)s)")
-    cosmos.add_argument(
-        "--cosmos-password",
-        default=os.environ.get(PASSWORD_ENVIRONMENT),
-        help=f"COSMOS password (default: ${PASSWORD_ENVIRONMENT})",
-    )
-    cosmos.add_argument("--cosmos-scope", default="DEFAULT", help="COSMOS scope (default: %(default)s)")
-    cosmos.add_argument(
-        "--cosmos-variable",
-        action="append",
-        default=[],
-        metavar="NAME=VALUE",
-        help="Override a plugin variable (repeatable)",
-    )
-    cosmos.add_argument(
-        "--force-install", action="store_true", help="Reinstall the plugin even if this dictionary is already installed"
-    )
-    return cosmos
+class CosmosParser(ParserBase):
+    """COSMOS connection and plugin options; the tool decides whether installing is the default"""
+
+    DESCRIPTION = "COSMOS options"
+
+    def get_arguments(self) -> dict[tuple[str, ...], dict[str, Any]]:
+        return {
+            ("--target-name",): {
+                "default": STATIC_TARGET,
+                "help": "Default COSMOS target name. [default: %(default)s]",
+            },
+            ("--cosmos-url",): {
+                "default": "http://localhost:2900",
+                "help": "COSMOS base URL. [default: %(default)s]",
+            },
+            ("--cosmos-password",): {
+                "default": os.environ.get(PASSWORD_ENVIRONMENT),
+                "help": f"COSMOS password. [default: ${PASSWORD_ENVIRONMENT}]",
+            },
+            ("--cosmos-scope",): {
+                "default": "DEFAULT",
+                "help": "COSMOS scope. [default: %(default)s]",
+            },
+            ("--cosmos-variable",): {
+                "action": "append",
+                "default": [],
+                "metavar": "NAME=VALUE",
+                "help": "Override a plugin variable (repeatable)",
+            },
+            ("--force-install",): {
+                "action": "store_true",
+                "help": "Reinstall the plugin even if this dictionary is already installed",
+            },
+        }
+
+    def handle_arguments(self, args, **kwargs):
+        args.cosmos_variables = parse_variables(args.cosmos_variable)
+        return args
 
 
 def parse_variables(pairs: list[str]) -> dict[str, str]:
@@ -74,7 +94,7 @@ def ensure_installed(
 
 
 def install_from_arguments(args: argparse.Namespace, artifacts: PluginArtifacts) -> None:
-    """Install `artifacts` into the COSMOS described by the options from add_cosmos_arguments
+    """Install `artifacts` into the COSMOS described by the CosmosParser options
 
     Raises ValueError for malformed --cosmos-variable pairs and CosmosApiError for COSMOS failures.
     """
