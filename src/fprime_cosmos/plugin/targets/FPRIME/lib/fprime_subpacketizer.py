@@ -1,3 +1,6 @@
+# Derived from openc3-cosmos-fprime lib/fprime_subpacketizer.py
+# Copyright 2026 OpenC3, Inc. Licensed under the MIT License; see the NOTICE file
+# in the fprime-cosmos distribution for the full license text.
 """Splits an F Prime channelized telemetry packet into one COSMOS subpacket per channel
 
 F Prime's TlmChan component concatenates channel records (id, time, value) into a single

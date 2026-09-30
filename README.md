@@ -18,8 +18,8 @@ F Prime deployment  <-- framing / transport -->  fprime-comm-bridge  <-- UDP, F 
 pip install fprime-cosmos
 ```
 
-This pulls in `fprime-gds`, which provides the dictionary loaders and `fprime-comm-bridge`. Until an
-`fprime-gds` release ships `fprime-comm-bridge` (4.3.1 does not), install it from the development branch first:
+This pulls in `fprime-gds`, which provides the dictionary loaders and `fprime-comm-bridge`. The bridge is
+merged on the `fprime-gds` development branch; until a release ships it (4.3.1 does not), install that first:
 
 ```bash
 pip install "git+https://github.com/nasa/fprime-gds.git@devel"
@@ -53,7 +53,10 @@ machine. The default `--cosmos-url` is plain HTTP on `localhost`; use an `https:
    - generates the plugin into `./openc3-plugin/` and packages it as a gem,
    - installs (or upgrades) the plugin in COSMOS, skipping the install when the same dictionary is already
      installed (the dictionary digest is part of the gem version),
-   - starts `fprime-comm-bridge` with `--framing-selection space-packet-space-data-link`.
+   - starts `fprime-comm-bridge` with `--framing-selection space-packet-space-data-link`,
+   - with `--app path/to/MyDeployment`, starts the deployment once the bridge is up, connected to the
+     bridge's `tcp-fast-server` (`-a 127.0.0.1 -p 50000` by default; `--app-arguments` overrides), and stops
+     it again when the bridge exits or on Ctrl-C. The deployment's output goes to `<output>/logs/`.
 
    Anything the launcher does not recognise is forwarded to `fprime-comm-bridge`, so the flight link is
    configured exactly as for the GDS, for example:
@@ -72,6 +75,9 @@ machine. The default `--cosmos-url` is plain HTTP on `localhost`; use an `https:
 | --- | --- |
 | `--target-name NAME` | COSMOS target name (default `FPRIME`) |
 | `--packet-set-name NAME` | Packet set to use when the dictionary defines several |
+| `--app PATH` | Deployment binary to start alongside the bridge |
+| `--app-arguments "..."` | Arguments for `--app` (default `-a <tcp-fast address> -p <tcp-fast port>`) |
+| `--logs DIR` | Where the deployment log is written (default `<output>/logs`) |
 | `--cosmos-url URL` | COSMOS base URL (default `http://localhost:2900`) |
 | `--cosmos-password`, `$OPENC3_API_PASSWORD` | COSMOS password (set on first use if COSMOS has none) |
 | `--cosmos-scope SCOPE` | COSMOS scope (default `DEFAULT`) |
@@ -101,14 +107,15 @@ One plugin serves one COSMOS target: installing a dictionary for a target that a
 serves upgrades that plugin in place (COSMOS forbids two plugins defining the same target). Use
 `--target-name` to run several deployments side by side.
 
-### Generating without installing
+### Generating the plugin on its own
 
 ```bash
-fprime-to-cosmos MyDeploymentTopologyDictionary.json -o openc3-plugin [--target-name NAME] [--no-gem]
+fprime-to-cosmos MyDeploymentTopologyDictionary.json -o openc3-plugin [--target-name NAME] [--no-gem] [--install]
 ```
 
-writes `openc3-plugin/openc3-cosmos-fprime-<deployment>/` and the corresponding `.gem`, which can be installed
-through the COSMOS Admin tool.
+By default this only writes `openc3-plugin/openc3-cosmos-fprime-<deployment>/` and the corresponding `.gem`,
+which can be installed through the COSMOS Admin tool or `openc3cli load`. With `--install` the gem is also
+installed into COSMOS (same `--cosmos-*`/`--force-install` options as the launcher).
 
 ## What is generated
 
@@ -137,3 +144,9 @@ pytest
 ruff check src tests && ruff format --check src tests
 python tests/update_golden.py   # after intentional emitter changes
 ```
+
+## Attribution
+
+`fprime_subpacketizer.py` and the plugin variable layout derive from
+[openc3-cosmos-fprime](https://github.com/OpenC3/openc3-cosmos-fprime), Copyright 2026 OpenC3, Inc., MIT
+License; see [NOTICE](NOTICE). fprime-cosmos itself is licensed under the Apache License 2.0 ([LICENSE](LICENSE)).
