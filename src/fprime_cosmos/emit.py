@@ -51,6 +51,11 @@ def quote(text: str | None) -> str:
     return f'"{cleaned}"'
 
 
+def header(dictionary: FprimeDictionary) -> str:
+    """The generated-file banner; a comment, but COSMOS runs ERB over comments too, so the names are quoted"""
+    return HEADER.format(dictionary=quote(dictionary.path.name), deployment=quote(dictionary.deployment_name))
+
+
 def identifier(name: str) -> str:
     """`name` when it is safe as a bare COSMOS token (the text is parsed and ERB-evaluated), else DictionaryError"""
     if not _IDENTIFIER.fullmatch(name):
@@ -177,7 +182,7 @@ def _channel_modifiers(channel: ChTemplate, item: CosmosItem) -> list[str]:
 def _time_items(layout: WireLayout) -> list[str]:
     base, context, seconds, useconds = TIME_ITEMS
     lines = [f"  APPEND_ITEM {base} {layout.time_base_bits} UINT {quote('F Prime time base')}"]
-    lines.extend(f"    STATE {name} {value}" for name, value in layout.time_base_states.items())
+    lines.extend(f"    STATE {identifier(name)} {int(value)}" for name, value in layout.time_base_states.items())
     lines.extend(
         [
             f"  APPEND_ITEM {context} {layout.time_context_bits} UINT {quote('F Prime time context')}",
@@ -210,7 +215,7 @@ def emit_command(command: CmdTemplate, layout: WireLayout) -> list[str]:
 
 
 def emit_commands(dictionary: FprimeDictionary) -> str:
-    blocks = [HEADER.format(dictionary=dictionary.path.name, deployment=dictionary.deployment_name)]
+    blocks = [header(dictionary)]
     for command in dictionary.commands:
         blocks.append("\n".join(emit_command(command, dictionary.layout)) + "\n")
     return "\n".join(blocks)
@@ -243,14 +248,14 @@ def emit_unknown_packet(layout: WireLayout) -> list[str]:
     description = quote("F Prime packets not handled by this plugin (events, files, data products)")
     lines = [f"TELEMETRY {TARGET} {UNKNOWN_PACKET} BIG_ENDIAN {description}", "  CATCHALL"]
     lines.extend(_item_lines(descriptor))
-    lines.extend(f"    STATE {name} {value}" for name, value in layout.packet_types.items())
+    lines.extend(f"    STATE {identifier(name)} {int(value)}" for name, value in layout.packet_types.items())
     lines.append(f"  APPEND_ITEM DATA 0 BLOCK {quote('Remaining packet bytes')}")
     return lines
 
 
 def emit_channels(dictionary: FprimeDictionary) -> str:
     layout = dictionary.layout
-    blocks = [HEADER.format(dictionary=dictionary.path.name, deployment=dictionary.deployment_name)]
+    blocks = [header(dictionary)]
     blocks.append("\n".join(emit_channelized_parent(layout)) + "\n")
     for channel in dictionary.channels:
         blocks.append("\n".join(emit_channel(channel, layout)) + "\n")
@@ -274,7 +279,7 @@ def emit_packet(packet: PktTemplate, layout: WireLayout) -> list[str]:
 
 def emit_packets(dictionary: FprimeDictionary) -> str:
     """Packetized telemetry followed by the catch-all (packets.txt sorts, and so loads, after channels.txt)"""
-    blocks = [HEADER.format(dictionary=dictionary.path.name, deployment=dictionary.deployment_name)]
+    blocks = [header(dictionary)]
     for packet in dictionary.packets:
         blocks.append("\n".join(emit_packet(packet, dictionary.layout)) + "\n")
     blocks.append("\n".join(emit_unknown_packet(dictionary.layout)) + "\n")

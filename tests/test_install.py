@@ -6,13 +6,20 @@ from fprime_gds.executables.cli import ParserBase
 from fprime_cosmos import install
 from fprime_cosmos.plugin_builder import PluginArtifacts
 
+PLUGIN_TXT = """VARIABLE fprime_target_name FPRIME
+VARIABLE fprime_bridge_host host.docker.internal
+VARIABLE fprime_bridge_port 50001
+TARGET FPRIME <%= fprime_target_name %>
+"""
+DEFAULTS = {"fprime_bridge_host": "host.docker.internal", "fprime_bridge_port": "50001"}
+
 
 class FakeClient:
     scope = "DEFAULT"
 
     def __init__(self, installed, variables=None):
         self.installed = installed
-        self.variables = variables or {}
+        self.variables = {**DEFAULTS, **(variables or {})}
         self.installs = []
 
     def authenticate(self):
@@ -33,7 +40,12 @@ class FakeClient:
 def artifacts(tmp_path, digest="abc"):
     gem = tmp_path / f"openc3-cosmos-fprime-ref-1.0.0.{digest}.gem"
     gem.touch()
+    (tmp_path / "plugin.txt").write_text(PLUGIN_TXT)
     return PluginArtifacts(tmp_path, "openc3-cosmos-fprime-ref", f"1.0.0.{digest}", gem)
+
+
+def test_declared_variables(tmp_path):
+    assert install.declared_variables(artifacts(tmp_path)) == {"fprime_target_name": "FPRIME", **DEFAULTS}
 
 
 def test_parse_variables():
@@ -73,12 +85,19 @@ def test_ensure_installed_skips_same_digest_and_upgrades_target_owner(tmp_path):
 
 def test_ensure_installed_applies_changed_variables_to_same_gem(tmp_path):
     same = "openc3-cosmos-fprime-ref-1.0.0.abc.gem__3"
-    client = FakeClient({same: "FPRIME"}, variables={"fprime_bridge_host": "10.0.0.1", "fprime_bridge_port": 50001})
+    client = FakeClient({same: "FPRIME"}, variables={"fprime_bridge_port": 50001})
     install.ensure_installed(client, artifacts(tmp_path), {"fprime_bridge_port": "50001"}, "FPRIME", force=False)
     assert client.installs == []
     variables = {"fprime_bridge_host": "192.168.1.5"}
     install.ensure_installed(client, artifacts(tmp_path), variables, "FPRIME", force=False)
     assert client.installs == [(str(artifacts(tmp_path).gem_path), variables, same)]
+
+
+def test_ensure_installed_reverts_dropped_override_to_plugin_default(tmp_path):
+    same = "openc3-cosmos-fprime-ref-1.0.0.abc.gem__3"
+    client = FakeClient({same: "FPRIME"}, variables={"fprime_bridge_host": "192.168.1.5"})
+    install.ensure_installed(client, artifacts(tmp_path), {}, "FPRIME", force=False)
+    assert client.installs == [(str(artifacts(tmp_path).gem_path), {}, same)]
 
 
 def test_install_from_arguments_uses_cosmos_options(tmp_path, monkeypatch):

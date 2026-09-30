@@ -19,7 +19,7 @@ Requires Python 3.10 or newer and COSMOS 6.10.0 or newer (the generated gem decl
 command-line tools.
 
 ```bash
-pip install fprime-cosmos
+pip install "git+https://github.com/fprime-community/fprime-cosmos.git"
 ```
 
 This pulls in `fprime-gds`, which provides the dictionary loaders and `fprime-comm-bridge`. The bridge ships in
@@ -61,11 +61,12 @@ machine. The default `--cosmos-url` is plain HTTP on `localhost`; use an `https:
      installed (a digest of the generated plugin is part of the gem version),
    - starts `fprime-comm-bridge` with the selected communication adapter (default `tcp-fast-server`) and framing
      (default `space-packet-space-data-link`),
-   - starts the deployment connected to the bridge (`-a 127.0.0.1 -p 50000` by default; `--application-arguments`
+   - starts the deployment once the bridge accepts connections (`-a 127.0.0.1 -p 50000` by default; `--application-arguments`
      overrides, `-n` skips it), logging it under `logs/fprime-cosmos-<date>/`. Everything is stopped when the
      bridge exits or on Ctrl-C.
 
-   All fprime-gds options apply, so the flight link is configured exactly as for the GDS, for example:
+   The fprime-gds dictionary, deployment, logging, communication and framing options apply, so the flight link is
+   configured exactly as for the GDS, for example:
 
    ```bash
    fprime-cosmos -d build-artifacts/Linux/MyDeployment              # explicit deployment directory

@@ -75,10 +75,21 @@ def installed_plugin_for_target(client: CosmosClient, target: str) -> str | None
     return None
 
 
-def variables_match(client: CosmosClient, plugin: str, variables: dict[str, str]) -> bool:
-    """True when the installed plugin already carries every requested variable value"""
+def declared_variables(artifacts: PluginArtifacts) -> dict[str, str]:
+    """Plugin variables and defaults declared by the generated plugin.txt"""
+    declared = {}
+    for line in (artifacts.directory / "plugin.txt").read_text().splitlines():
+        fields = line.split()
+        if len(fields) >= 3 and fields[0] == "VARIABLE":
+            declared[fields[1]] = " ".join(fields[2:])
+    return declared
+
+
+def variables_match(client: CosmosClient, plugin: str, artifacts: PluginArtifacts, variables: dict[str, str]) -> bool:
+    """True when the installed plugin carries the effective value (override or plugin default) of every variable"""
     installed = client.plugin(plugin).get("variables", {})
-    return all(str(variable_value(installed.get(name))) == str(value) for name, value in variables.items())
+    effective = {**declared_variables(artifacts), **variables}
+    return all(str(variable_value(installed.get(name))) == str(value) for name, value in effective.items())
 
 
 def ensure_installed(
@@ -89,7 +100,7 @@ def ensure_installed(
     existing = installed_plugin_for_target(client, target)
     same_gem = existing is not None and existing.startswith(f"{artifacts.plugin_prefix}.gem__")
     if same_gem and not force:
-        if variables_match(client, existing, variables):
+        if variables_match(client, existing, artifacts, variables):
             print(
                 f"[INFO] COSMOS target {target} already runs {existing}; skipping install (--force-install overrides)"
             )

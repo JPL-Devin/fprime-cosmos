@@ -1,5 +1,6 @@
 """Command line entry points: fprime-gds style arguments plus the COSMOS options"""
 
+import socket
 from argparse import Namespace
 from unittest.mock import patch
 
@@ -96,6 +97,9 @@ def launches(monkeypatch):
 
     monkeypatch.setattr(launcher, "launch_process", launch_process)
     monkeypatch.setattr(launcher, "launch_app", launch_app)
+    monkeypatch.setattr(
+        launcher, "wait_for_bridge", lambda connection, timeout=None: started.append(("ready", connection))
+    )
     monkeypatch.setattr(launcher, "docker_source_addresses", lambda: [])
     return started
 
@@ -133,8 +137,8 @@ def test_launcher_starts_app_after_bridge(tmp_path, launches):
     app.write_text("#!/bin/sh\n")
     argv = launcher_argv(tmp_path, "-d", str(tmp_path), "--tcp-fast-port", "60000")
     assert launcher.main(argv) == 0
-    assert [entry[0] for entry in launches] == ["bridge", "app", "wait"]
-    assert launches[1] == ("app", app, ("127.0.0.1", 60000), None)
+    assert [entry[0] for entry in launches] == ["bridge", "ready", "app", "wait"]
+    assert launches[2] == ("app", app, ("127.0.0.1", 60000), None)
 
 
 def test_launcher_forwards_application_arguments(tmp_path, launches):
@@ -143,7 +147,8 @@ def test_launcher_forwards_application_arguments(tmp_path, launches):
     app.write_text("#!/bin/sh\n")
     argv = launcher_argv(tmp_path, "-d", str(tmp_path), "--application-arguments", "extra", "argument")
     assert launcher.main(argv) == 0
-    assert launches[1] == ("app", app, ("127.0.0.1", 50000), ["extra", "argument"])
+    assert launches[1] == ("ready", ("127.0.0.1", 50000))
+    assert launches[2] == ("app", app, ("127.0.0.1", 50000), ["extra", "argument"])
 
 
 def test_launcher_installs_unless_skipped(tmp_path, launches, monkeypatch):
@@ -175,6 +180,18 @@ def test_launcher_reports_bridge_failure(tmp_path, launches, monkeypatch):
     monkeypatch.setattr(launcher, "launch_process", lambda *args, **kwargs: bridge)
     launches.clear()
     assert launcher.main(launcher_argv(tmp_path, "-n")) == 1
+
+
+def test_wait_for_bridge_returns_once_listening_and_times_out_otherwise():
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    with listener:
+        listener.bind(("127.0.0.1", 0))
+        listener.listen(1)
+        connection = listener.getsockname()
+        launcher.wait_for_bridge(connection, timeout=2)
+        listener.accept()[0].close()
+    with pytest.raises(RuntimeError, match="not accepting connections"):
+        launcher.wait_for_bridge(connection, timeout=0.5)
 
 
 def test_launcher_rejects_missing_app(tmp_path):

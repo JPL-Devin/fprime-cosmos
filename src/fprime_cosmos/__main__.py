@@ -14,6 +14,7 @@ import ipaddress
 import socket
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -44,7 +45,9 @@ LAUNCHER_PLUGIN_CATEGORIES = ["communication", "framing"]
 DEFAULT_COMMUNICATION = "tcp-fast-server"
 DEFAULT_FRAMING = "space-packet-space-data-link"
 NO_COMMUNICATION = "none"
-BRIDGE_LAUNCH_TIME = 1  # seconds the bridge must stay up before the deployment connects to it
+BRIDGE_LAUNCH_TIME = 1  # seconds the bridge must stay up before it is probed
+BRIDGE_READY_TIMEOUT = 30  # seconds to wait for the bridge to accept a connection before starting the deployment
+BRIDGE_POLL_INTERVAL = 0.2
 DOCKER_INTERFACE_PREFIXES = ("docker", "br-")
 DOCKER_HOST_INTERFACE = "docker0"  # host.docker.internal resolves to the default bridge gateway
 BIND_ANY = "0.0.0.0"  # noqa: S104 - last resort when the Docker host address cannot be determined
@@ -185,9 +188,28 @@ def launch_comm_bridge(args):
     )
 
 
+def wait_for_bridge(connection: tuple[str, int], timeout: float = BRIDGE_READY_TIMEOUT) -> None:
+    """Block until the bridge accepts a TCP connection at `connection`; RuntimeError when `timeout` seconds pass"""
+    address, port = connection
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            with socket.create_connection((address, port), timeout=BRIDGE_POLL_INTERVAL):
+                return
+        except OSError as error:
+            if time.monotonic() >= deadline:
+                raise RuntimeError(
+                    f"fprime-comm-bridge not accepting connections at {address}:{port}: {error}"
+                ) from error
+        time.sleep(BRIDGE_POLL_INTERVAL)
+
+
 def launch_deployment_app(args):
-    """Start the deployment connected to the bridge's adapter (fprime-gds --application-arguments overrides)"""
-    return launch_app(args, app_connection(args))
+    """Start the deployment once the bridge accepts connections (fprime-gds --application-arguments overrides)"""
+    connection = app_connection(args)
+    if connection is not None:
+        wait_for_bridge(connection)
+    return launch_app(args, connection)
 
 
 def main(arguments: list[str] | None = None) -> int:
