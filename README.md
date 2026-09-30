@@ -14,12 +14,17 @@ F Prime deployment  <-- framing / transport -->  fprime-comm-bridge  <-- UDP, F 
 
 ## Installation
 
+Requires Python 3.10 or newer and COSMOS 6.10.0 or newer (the generated gem declares
+`openc3_cosmos_minimum_version`). The local-Docker defaulting described under Options uses the `docker` and `ip`
+command-line tools.
+
 ```bash
 pip install fprime-cosmos
 ```
 
-This pulls in `fprime-gds`, which provides the dictionary loaders and `fprime-comm-bridge`. The bridge is
-merged on the `fprime-gds` development branch; until a release ships it (4.3.1 does not), install that first:
+This pulls in `fprime-gds`, which provides the dictionary loaders and `fprime-comm-bridge`. The bridge ships in
+`fprime-gds` 4.4.0a4 and later (pre-releases, selected automatically because the dependency floor names one); to use
+the development branch instead:
 
 ```bash
 pip install "git+https://github.com/nasa/fprime-gds.git@devel"
@@ -52,8 +57,8 @@ machine. The default `--cosmos-url` is plain HTTP on `localhost`; use an `https:
    The launcher
 
    - generates the plugin into `./openc3-plugin/` and packages it as a gem,
-   - installs (or upgrades) the plugin in COSMOS, skipping the install when the same dictionary is already
-     installed (the dictionary digest is part of the gem version),
+   - installs (or upgrades) the plugin in COSMOS, skipping the install when the same plugin is already
+     installed (a digest of the generated plugin is part of the gem version),
    - starts `fprime-comm-bridge` with the selected communication adapter (default `tcp-fast-server`) and framing
      (default `space-packet-space-data-link`),
    - starts the deployment connected to the bridge (`-a 127.0.0.1 -p 50000` by default; `--application-arguments`
@@ -99,7 +104,7 @@ COSMOS specific:
 | `--cosmos-password`, `$OPENC3_API_PASSWORD` | COSMOS password (set on first use if COSMOS has none) |
 | `--cosmos-scope SCOPE` | COSMOS scope (default `DEFAULT`) |
 | `--cosmos-variable NAME=VALUE` | Override a plugin variable (see below) |
-| `--force-install` | Reinstall even when the dictionary digest matches |
+| `--force-install` | Reinstall even when the generated plugin digest matches |
 | `--skip-install` | Generate the plugin but do not install it |
 
 Plugin variables (all defaults match the bridge defaults):
@@ -115,8 +120,9 @@ Commands reach the bridge from the COSMOS container addresses. When COSMOS is lo
 those addresses from `docker ps`/`docker inspect` (plus the Docker bridge gateways) and starts the bridge with
 `--udp-fast-bind-address <docker0 address> --udp-fast-allowed-source <addresses>`, i.e. the bridge listens only
 on the address the containers know as `host.docker.internal` and only accepts datagrams from them (the bridge
-command port is otherwise unauthenticated). Restart the launcher if the containers are recreated with new
-addresses. Setting either option yourself disables this defaulting, for example
+command port is otherwise unauthenticated). When no `docker0` interface is visible on the host (for example rootless
+Docker) the launcher binds `0.0.0.0` instead and relies on the allow-list alone. Restart the launcher if the containers
+are recreated with new addresses. Setting either option yourself disables this defaulting, for example
 `--udp-fast-bind-address 192.168.1.5 --udp-fast-allowed-source 192.168.1.20` for a remote COSMOS (and set
 `--cosmos-variable fprime_bridge_host=192.168.1.5` so COSMOS sends commands to that address).
 

@@ -3,7 +3,7 @@
 A drop-in for `fprime-gds`/`fprime-yamcs`: the dictionary, deployment, application and logging options
 (-d/--deployment, --dictionary, --app, -n/--no-app, --application-arguments, -l/--logs, ...) and the
 communication/framing plugin options are the fprime-gds ones. The launcher generates the COSMOS plugin from
-the dictionary, installs it when COSMOS does not already run a plugin built from the same dictionary digest,
+the dictionary, installs it when COSMOS does not already run a plugin with the same plugin digest,
 starts fprime-comm-bridge with the selected communication adapter and framing, and then starts the
 deployment connected to the bridge.
 """
@@ -16,6 +16,7 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from fprime_gds.common.communication.adapters.udp_fast import UdpFastAdapter
 from fprime_gds.executables.cli import (
@@ -45,7 +46,7 @@ DEFAULT_FRAMING = "space-packet-space-data-link"
 NO_COMMUNICATION = "none"
 BRIDGE_LAUNCH_TIME = 1  # seconds the bridge must stay up before the deployment connects to it
 DOCKER_INTERFACE_PREFIXES = ("docker", "br-")
-DOCKER_HOST_INTERFACE = "docker"  # host.docker.internal resolves to the default bridge (docker0) gateway
+DOCKER_HOST_INTERFACE = "docker0"  # host.docker.internal resolves to the default bridge gateway
 BIND_ANY = "0.0.0.0"  # noqa: S104 - last resort when the Docker host address cannot be determined
 LOOPBACK = "127.0.0.1"
 
@@ -145,7 +146,7 @@ def docker_source_addresses() -> list[str]:
 
 
 def cosmos_is_local(cosmos_url: str) -> bool:
-    host = cosmos_url.split("://", 1)[-1].split("/", 1)[0].rsplit(":", 1)[0]
+    host = urlsplit(cosmos_url).hostname or ""
     try:
         return host in ("localhost", LOOPBACK) or socket.gethostbyname(host) == socket.gethostbyname(
             socket.gethostname()

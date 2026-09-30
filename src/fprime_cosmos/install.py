@@ -8,7 +8,7 @@ from typing import Any
 
 from fprime_gds.executables.cli import ParserBase
 
-from fprime_cosmos.cosmos_api import CosmosClient
+from fprime_cosmos.cosmos_api import CosmosClient, variable_value
 from fprime_cosmos.plugin_builder import GEM_NAME_PREFIX, STATIC_TARGET, PluginArtifacts
 
 TARGET_VARIABLE = "fprime_target_name"
@@ -70,9 +70,7 @@ def installed_plugin_for_target(client: CosmosClient, target: str) -> str | None
     for name in client.plugins():
         if not name.startswith(f"{GEM_NAME_PREFIX}-"):
             continue
-        variable = client.plugin(name).get("variables", {}).get(TARGET_VARIABLE)
-        value = variable.get("value") if isinstance(variable, dict) else variable
-        if value == target:
+        if variable_value(client.plugin(name).get("variables", {}).get(TARGET_VARIABLE)) == target:
             return name
     return None
 
@@ -80,7 +78,7 @@ def installed_plugin_for_target(client: CosmosClient, target: str) -> str | None
 def ensure_installed(
     client: CosmosClient, artifacts: PluginArtifacts, variables: dict[str, str], target: str, force: bool
 ) -> None:
-    """Install the gem unless a plugin built from the same dictionary digest already serves the target"""
+    """Install the gem unless a plugin with the same plugin digest already serves the target"""
     client.authenticate()
     existing = installed_plugin_for_target(client, target)
     if existing and existing.startswith(f"{artifacts.plugin_prefix}.gem__") and not force:
@@ -96,9 +94,9 @@ def ensure_installed(
 def install_from_arguments(args: argparse.Namespace, artifacts: PluginArtifacts) -> None:
     """Install `artifacts` into the COSMOS described by the CosmosParser options
 
-    Raises ValueError for malformed --cosmos-variable pairs and CosmosApiError for COSMOS failures.
+    Raises CosmosApiError for COSMOS failures.
     """
-    variables = parse_variables(args.cosmos_variable)
+    variables = args.cosmos_variables
     client = CosmosClient(args.cosmos_url, args.cosmos_password, args.cosmos_scope)
     target = variables.get(TARGET_VARIABLE, args.target_name)
     ensure_installed(client, artifacts, variables, target, args.force_install)

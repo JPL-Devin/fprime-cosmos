@@ -61,7 +61,6 @@ class WireLayout:
     bool_true: int
     bool_false: int
     packet_types: dict[str, int]
-    apids: dict[str, int]
 
     @property
     def command_descriptor(self) -> int:
@@ -74,10 +73,6 @@ class WireLayout:
     @property
     def packetized_descriptor(self) -> int:
         return self.packet_types["FW_PACKET_PACKETIZED_TLM"]
-
-    @property
-    def command_apid(self) -> int:
-        return self.apids["FW_PACKET_COMMAND"]
 
 
 def _type_bits(config: ConfigManager, name: str) -> int:
@@ -116,9 +111,9 @@ class FprimeDictionary:
         self.packet_set_name = self._select_packet_set(packet_set_name)
         try:
             self.dictionaries = Dictionaries.load_dictionaries_into_config(str(self.path), None, self.packet_set_name)
+            self.layout = self._read_layout(ConfigManager.get_instance())
         except Exception as error:
             raise DictionaryError(f"Failed to load dictionary '{self.path}': {error}") from error
-        self.layout = self._read_layout(ConfigManager.get_instance())
 
     def _select_packet_set(self, requested: str | None) -> str | None:
         names = PktJsonLoader(str(self.path)).get_packet_set_names(None)
@@ -132,7 +127,6 @@ class FprimeDictionary:
 
     def _read_layout(self, config: ConfigManager) -> WireLayout:
         packet_types = _packet_types(config)
-        apids = _enum_values(config, APID_ENUM) or packet_types
         return WireLayout(
             descriptor_bits=_type_bits(config, "FwPacketDescriptorType"),
             opcode_bits=_type_bits(config, "FwOpcodeType"),
@@ -145,7 +139,6 @@ class FprimeDictionary:
             bool_true=int(config.get_constant("FW_SERIALIZE_TRUE_VALUE")),
             bool_false=int(config.get_constant("FW_SERIALIZE_FALSE_VALUE")),
             packet_types=packet_types,
-            apids=apids,
         )
 
     @property
@@ -169,5 +162,5 @@ class FprimeDictionary:
         return list((self.dictionaries.packet or {}).values())
 
     def content_hash(self) -> str:
-        """Short digest of the dictionary file, used to skip regeneration when nothing changed"""
+        """Short digest of the dictionary file, recorded in the gem metadata"""
         return hashlib.sha256(self.path.read_bytes()).hexdigest()[:12]

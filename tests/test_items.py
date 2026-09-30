@@ -23,7 +23,6 @@ LAYOUT = WireLayout(
     bool_true=1,
     bool_false=0,
     packet_types={"FW_PACKET_COMMAND": 0, "FW_PACKET_TELEM": 1, "FW_PACKET_PACKETIZED_TLM": 4},
-    apids={"FW_PACKET_COMMAND": 0},
 )
 
 

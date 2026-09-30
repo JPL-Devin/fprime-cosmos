@@ -16,7 +16,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "fprime-gds>=4.4.0a3",
+    "fprime-gds>=4.4.0a4",
     "requests>=2.25",
 ]
 

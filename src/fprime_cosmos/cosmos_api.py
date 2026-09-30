@@ -15,11 +15,18 @@ import requests
 API = "/openc3-api"
 INSTALL_TIMEOUT_SECONDS = 600
 POLL_SECONDS = 2.0
-TERMINAL_STATES = {"Complete", "Crashed", "Error", "Warning", "Expired"}
+SUCCESS_STATES = {"Complete", "Warning"}
+FAILURE_STATES = {"Crashed", "Error", "Expired"}
+TERMINAL_STATES = SUCCESS_STATES | FAILURE_STATES
 
 
 class CosmosApiError(Exception):
     """Raised when COSMOS rejects a request or an install fails"""
+
+
+def variable_value(variable: Any) -> Any:
+    """Value of a plugin variable as COSMOS reports it: a `{"value": ...}` hash or a bare scalar"""
+    return variable.get("value") if isinstance(variable, dict) else variable
 
 
 class CosmosClient:
@@ -65,9 +72,6 @@ class CosmosClient:
         """Names of the plugins installed in the scope"""
         return list(self._request("GET", "/plugins").json())
 
-    def find_plugin(self, prefix: str) -> str | None:
-        return next((name for name in self.plugins() if name.startswith(prefix)), None)
-
     def plugin(self, name: str) -> dict:
         """Hash of an installed plugin, including its variables as COSMOS stored them"""
         return self._request("GET", f"/plugins/{name}").json()
@@ -94,7 +98,7 @@ class CosmosClient:
             status = self._request("GET", f"/process_status/{process}").json()
             state = status.get("state") if status else None
             if state in TERMINAL_STATES:
-                if state not in ("Complete", "Warning"):
+                if state not in SUCCESS_STATES:
                     raise CosmosApiError(f"Plugin install {name} ended in state {state}:\n{status.get('output', '')}")
                 return plugin_hash["name"]
             time.sleep(POLL_SECONDS)

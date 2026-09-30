@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import re
 import shutil
 from dataclasses import dataclass
@@ -28,7 +29,7 @@ class PluginArtifacts:
 
     @property
     def plugin_prefix(self) -> str:
-        """Prefix of the COSMOS plugin name, which is `<gem>-<version>__<timestamp>` once installed"""
+        """Prefix of the COSMOS plugin name, which is `<gem>-<version>.gem__<timestamp>` once installed"""
         return f"{self.gem_name}-{self.version}"
 
 
@@ -40,9 +41,18 @@ def gem_name_for(dictionary: FprimeDictionary) -> str:
     return f"{GEM_NAME_PREFIX}-{slug(dictionary.deployment_name.rsplit('.', 1)[-1])}"
 
 
-def version_for(dictionary: FprimeDictionary) -> str:
-    """Gem version carrying the dictionary digest so COSMOS sees a new version whenever the dictionary changes"""
-    return f"{BASE_VERSION}.{dictionary.content_hash()}"
+def plugin_digest(directory: Path) -> str:
+    """Short digest of every file in the plugin tree: dictionary, emitter or skeleton changes all yield a new value"""
+    digest = hashlib.sha256()
+    for path in sorted(path for path in Path(directory).rglob("*") if path.is_file()):
+        digest.update(str(path.relative_to(directory)).encode())
+        digest.update(path.read_bytes())
+    return digest.hexdigest()[:12]
+
+
+def version_for(directory: Path) -> str:
+    """Gem version carrying the plugin digest so COSMOS sees a new version whenever the generated plugin changes"""
+    return f"{BASE_VERSION}.{plugin_digest(directory)}"
 
 
 def write_plugin(dictionary: FprimeDictionary, output: Path, target_name: str = STATIC_TARGET) -> Path:
@@ -65,7 +75,7 @@ def write_plugin(dictionary: FprimeDictionary, output: Path, target_name: str = 
     plugin_txt = output / "plugin.txt"
     plugin_txt.write_text(
         plugin_txt.read_text().replace(
-            "VARIABLE fprime_target_name FPRIME", f"VARIABLE fprime_target_name {target_name}"
+            f"VARIABLE fprime_target_name {STATIC_TARGET}", f"VARIABLE fprime_target_name {target_name}"
         )
     )
     return output
@@ -77,8 +87,8 @@ def build_plugin(
     """Write the plugin tree to output/<gem name> and, optionally, build output/<gem name>-<version>.gem"""
     output = Path(output)
     gem_name = gem_name_for(dictionary)
-    version = version_for(dictionary)
     directory = write_plugin(dictionary, output / gem_name, target_name)
+    version = version_for(directory)
     gem_path = None
     if gem:
         spec = GemSpec(

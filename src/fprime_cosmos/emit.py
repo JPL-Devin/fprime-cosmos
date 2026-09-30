@@ -70,6 +70,27 @@ def _states(item: CosmosItem, indent: str) -> list[str]:
     return [f"{indent}STATE {name} {value}" for name, value in item.states]
 
 
+def _modifier_lines(item: CosmosItem, extra: Iterable[str] = ()) -> list[str]:
+    """STATE, VARIABLE_BIT_SIZE, caller supplied and META modifiers, shared by parameters and items"""
+    lines = _states(item, "    ")
+    if item.is_variable_string:
+        lines.append(f"    VARIABLE_BIT_SIZE {item.length_item} 8 0")
+    lines.extend(f"    {line}" for line in extra)
+    if item.fprime_type:
+        lines.append(f"    META FPRIME_TYPE {quote(item.fprime_type)}")
+    return lines
+
+
+def _descriptor_item(layout: WireLayout) -> CosmosItem:
+    return CosmosItem(
+        DESCRIPTOR_ITEM,
+        layout.descriptor_bits,
+        "UINT",
+        "F Prime packet descriptor",
+        fprime_type="FwPacketDescriptorType",
+    )
+
+
 def _parameter_lines(item: CosmosItem, id_value: int | None = None) -> list[str]:
     keyword = "APPEND_ID_PARAMETER" if id_value is not None else "APPEND_PARAMETER"
     if item.is_array:
@@ -82,11 +103,7 @@ def _parameter_lines(item: CosmosItem, id_value: int | None = None) -> list[str]
         default = item.default if id_value is None else id_value
         scalar = f"{item.name} {item.bit_size} {item.data_type} {minimum} {maximum} {default}"
         lines = [f"  {keyword} {scalar} {quote(item.description)}"]
-    lines.extend(_states(item, "    "))
-    if item.is_variable_string:
-        lines.append(f"    VARIABLE_BIT_SIZE {item.length_item} 8 0")
-    if item.fprime_type:
-        lines.append(f"    META FPRIME_TYPE {quote(item.fprime_type)}")
+    lines.extend(_modifier_lines(item))
     return lines
 
 
@@ -99,12 +116,7 @@ def _item_lines(item: CosmosItem, id_value: int | None = None, extra: Iterable[s
         lines = [f"  {keyword} {item.name} {item.bit_size} {item.data_type} {id_value} {quote(item.description)}"]
     else:
         lines = [f"  {keyword} {item.name} {item.bit_size} {item.data_type} {quote(item.description)}"]
-    lines.extend(_states(item, "    "))
-    if item.is_variable_string:
-        lines.append(f"    VARIABLE_BIT_SIZE {item.length_item} 8 0")
-    lines.extend(f"    {line}" for line in extra)
-    if item.fprime_type:
-        lines.append(f"    META FPRIME_TYPE {quote(item.fprime_type)}")
+    lines.extend(_modifier_lines(item, extra))
     return lines
 
 
@@ -154,13 +166,7 @@ def _value_items(name: str, template: ChTemplate, layout: WireLayout) -> list[st
 
 def emit_command(command: CmdTemplate, layout: WireLayout) -> list[str]:
     lines = [f"COMMAND {TARGET} {full_name(command)} BIG_ENDIAN {quote(command.get_description())}"]
-    descriptor = CosmosItem(
-        DESCRIPTOR_ITEM,
-        layout.descriptor_bits,
-        "UINT",
-        "F Prime packet descriptor",
-        fprime_type="FwPacketDescriptorType",
-    )
+    descriptor = _descriptor_item(layout)
     opcode = CosmosItem(OPCODE_ITEM, layout.opcode_bits, "UINT", "F Prime command opcode", fprime_type="FwOpcodeType")
     lines.extend(_parameter_lines(descriptor, layout.command_descriptor))
     lines.extend(_parameter_lines(opcode, command.get_op_code()))
@@ -189,13 +195,7 @@ def emit_channel(channel: ChTemplate, layout: WireLayout) -> list[str]:
 
 
 def emit_channelized_parent(layout: WireLayout) -> list[str]:
-    descriptor = CosmosItem(
-        DESCRIPTOR_ITEM,
-        layout.descriptor_bits,
-        "UINT",
-        "F Prime packet descriptor",
-        fprime_type="FwPacketDescriptorType",
-    )
+    descriptor = _descriptor_item(layout)
     description = quote("F Prime channelized telemetry (split into one subpacket per channel)")
     lines = [f"TELEMETRY {TARGET} {CHANNELIZED_PACKET} BIG_ENDIAN {description}", f"  SUBPACKETIZER {SUBPACKETIZER}"]
     lines.extend(_item_lines(descriptor, layout.telemetry_descriptor))
@@ -205,13 +205,7 @@ def emit_channelized_parent(layout: WireLayout) -> list[str]:
 
 
 def emit_unknown_packet(layout: WireLayout) -> list[str]:
-    descriptor = CosmosItem(
-        DESCRIPTOR_ITEM,
-        layout.descriptor_bits,
-        "UINT",
-        "F Prime packet descriptor",
-        fprime_type="FwPacketDescriptorType",
-    )
+    descriptor = _descriptor_item(layout)
     description = quote("F Prime packets not handled by this plugin (events, files, data products)")
     lines = [f"TELEMETRY {TARGET} {UNKNOWN_PACKET} BIG_ENDIAN {description}", "  CATCHALL"]
     lines.extend(_item_lines(descriptor))
@@ -233,13 +227,7 @@ def emit_channels(dictionary: FprimeDictionary) -> str:
 def emit_packet(packet: PktTemplate, layout: WireLayout) -> list[str]:
     description = quote(f"F Prime packetized telemetry {packet.get_name()}")
     lines = [f"TELEMETRY {TARGET} {full_name(packet)} BIG_ENDIAN {description}"]
-    descriptor = CosmosItem(
-        DESCRIPTOR_ITEM,
-        layout.descriptor_bits,
-        "UINT",
-        "F Prime packet descriptor",
-        fprime_type="FwPacketDescriptorType",
-    )
+    descriptor = _descriptor_item(layout)
     packet_id = CosmosItem(
         PACKET_ID_ITEM, layout.packet_id_bits, "UINT", "F Prime packet identifier", fprime_type="FwTlmPacketizeIdType"
     )

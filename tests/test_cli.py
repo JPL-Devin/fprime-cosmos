@@ -143,6 +143,15 @@ def test_launcher_forwards_application_arguments(tmp_path, launches):
     assert launches[1] == ("app", app, ("127.0.0.1", 50000), ["extra", "argument"])
 
 
+def test_launcher_installs_unless_skipped(tmp_path, launches, monkeypatch):
+    installed = []
+    monkeypatch.setattr(launcher, "install_from_arguments", lambda args, artifacts: installed.append(artifacts))
+    argv = [arg for arg in launcher_argv(tmp_path, "-n") if arg != "--skip-install"]
+    assert launcher.main(argv) == 0
+    assert installed[0].gem_path.is_file()
+    assert [entry[0] for entry in launches] == ["bridge", "wait"]
+
+
 def test_launcher_rejects_missing_app(tmp_path):
     with pytest.raises(SystemExit):
         launcher.main(launcher_argv(tmp_path, "--app", str(tmp_path / "nope")))
@@ -180,9 +189,20 @@ def test_docker_defaults_respect_user_udp_settings(monkeypatch):
 
 def test_docker_defaults_only_for_local_cosmos(monkeypatch):
     monkeypatch.setattr(launcher, "docker_source_addresses", lambda: ["172.18.0.6"])
+    addresses = {"cosmos.example.invalid": "203.0.113.5", "cosmos.local": "10.0.0.7", "myhost": "10.0.0.7"}
+    monkeypatch.setattr(launcher.socket, "gethostname", lambda: "myhost")
+
+    def resolve(host):
+        if host not in addresses:
+            raise OSError(host)
+        return addresses[host]
+
+    monkeypatch.setattr(launcher.socket, "gethostbyname", resolve)
     args = bridge_args(cosmos_url="http://cosmos.example.invalid:2900")
     launcher.apply_docker_defaults(args)
     assert args.udp_fast_allowed_sources is None
+    assert launcher.cosmos_is_local("http://user@cosmos.local:2900/path")
+    assert launcher.cosmos_is_local("http://[::1]:2900") is False
 
 
 def test_docker_defaults_without_docker(monkeypatch):

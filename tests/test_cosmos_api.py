@@ -77,11 +77,6 @@ def test_connection_error(client):
         client.plugins()
 
 
-def test_find_plugin(client):
-    client.session.responses = [FakeResponse(body=["openc3-cosmos-fprime-ref-1.0.0.abc.gem__0", "other"])]
-    assert client.find_plugin("openc3-cosmos-fprime-ref-1.0.0.abc") == "openc3-cosmos-fprime-ref-1.0.0.abc.gem__0"
-
-
 def test_plugin_reads_installed_hash(client):
     client.session.responses = [FakeResponse(body={"name": "p__0", "variables": {"fprime_target_name": "X"}})]
     assert client.plugin("p__0")["variables"] == {"fprime_target_name": "X"}
@@ -139,5 +134,16 @@ def test_install_crash_reports_output(client):
         FakeResponse(text="proc__3"),
         FakeResponse(body={"state": "Crashed", "output": "Error: bad"}),
     ]
-    with pytest.raises(CosmosApiError, match="Crashed"):
+    with pytest.raises(CosmosApiError, match="Crashed:\nError: bad"):
         client.install({"name": "plugin.gem"})
+
+
+def test_install_timeout(client):
+    client.session.responses = [FakeResponse(text="proc__4"), FakeResponse(body={"state": "Running"})]
+    with pytest.raises(CosmosApiError, match="did not finish"):
+        client.install({"name": "plugin.gem"}, timeout=0)
+
+
+def test_variable_value():
+    assert cosmos_api.variable_value({"value": "REF"}) == "REF"
+    assert cosmos_api.variable_value("REF") == "REF"

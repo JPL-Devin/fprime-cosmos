@@ -3,13 +3,20 @@
 import gzip
 import tarfile
 
-from fprime_cosmos.plugin_builder import build_plugin, gem_name_for, slug, version_for
+from fprime_cosmos.plugin_builder import build_plugin, gem_name_for, plugin_digest, slug, version_for
 
 
 def test_names(reference_dictionary):
     assert slug("Fprime Yamcs.Reference!") == "fprime-yamcs-reference"
     assert gem_name_for(reference_dictionary) == "openc3-cosmos-fprime-yamcsdeployment"
-    assert version_for(reference_dictionary) == f"1.0.0.{reference_dictionary.content_hash()}"
+
+
+def test_version_tracks_plugin_tree(reference_dictionary, tmp_path):
+    first = build_plugin(reference_dictionary, tmp_path / "a", gem=False)
+    again = build_plugin(reference_dictionary, tmp_path / "b", gem=False)
+    assert first.version == again.version == f"1.0.0.{plugin_digest(first.directory)}"
+    (first.directory / "targets" / "FPRIME" / "lib" / "fprime_subpacketizer.py").write_text("changed")
+    assert version_for(first.directory) != again.version
 
 
 def test_build_plugin_tree(reference_dictionary, tmp_path):

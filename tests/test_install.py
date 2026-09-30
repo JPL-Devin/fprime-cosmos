@@ -71,10 +71,13 @@ def test_ensure_installed_skips_same_digest_and_upgrades_target_owner(tmp_path):
 
 def test_install_from_arguments_uses_cosmos_options(tmp_path, monkeypatch):
     created = {}
+    owner = "openc3-cosmos-fprime-other-1.0.0.999.gem__0"
+    clients = []
 
     def fake_client(url, password, scope):
         created.update(url=url, password=password, scope=scope)
-        return FakeClient({})
+        clients.append(FakeClient({owner: "REF"}))
+        return clients[-1]
 
     monkeypatch.setattr(install, "CosmosClient", fake_client)
     args, _ = ParserBase.parse_args(
@@ -85,5 +88,6 @@ def test_install_from_arguments_uses_cosmos_options(tmp_path, monkeypatch):
     assert args.cosmos_variables == {"fprime_target_name": "REF"}
     install.install_from_arguments(args, artifacts(tmp_path))
     assert created == {"url": "http://c:2900", "password": "pw", "scope": "DEFAULT"}
+    assert clients[0].installs == [(str(artifacts(tmp_path).gem_path), {"fprime_target_name": "REF"}, owner)]
     with pytest.raises(SystemExit):
         ParserBase.parse_args([install.CosmosParser], "test", ["--cosmos-variable", "broken"])
